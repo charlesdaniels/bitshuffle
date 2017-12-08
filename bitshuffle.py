@@ -36,7 +36,7 @@ def encode_data(data, chunksize, compresslevel):
     chunks = []
     chunkptr = 0
     while True:
-        chunk = data[chunkptr:chunkptr + chunksize - 1]
+        chunk = data[chunkptr:chunkptr + chunksize]
         chunkptr += chunksize
 
         chunk = bz2.compress(chunk, compresslevel)
