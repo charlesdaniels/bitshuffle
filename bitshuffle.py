@@ -141,8 +141,12 @@ def main():
                     of.write("\n")
 
     elif args.decode:
+        infile = args.input
+        # set to True for infile to be deleted after decoding
+        is_tmp = False
         if stdin.isatty() and args.input is '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
+            is_tmp = True
             editor = os.environ['VISUAL']
             if editor is '':
                 editor = os.environ['EDITOR']
@@ -156,14 +160,17 @@ def main():
                 tf.flush()
             subprocess.call([editor, tmpfile])
 
-            # this forces the newly created tempfile to be used as the input
-            args.input = tmpfile
+            stderr.write("finished editing\n")
 
-        with open(args.input, 'rb') as f:
-            payload = decode(f.read().decode('ascii'))
+            infile = tmpfile
+
+        with open(infile, 'r') as f:
+            payload = decode(f.read())
             with open(args.output, 'wb') as of:
                     of.write(payload)
 
+        if is_tmp:
+            os.remove(infile)
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
