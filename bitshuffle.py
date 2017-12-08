@@ -158,10 +158,10 @@ def decode(message):
 
         segments = [None]*len(packets) # ordered by index of packets
         for index, packet in enumerate(packets):
-#             try:
-             segments[index] = re.split("\|", packet, flags=re.MULTILINE)
-#             except IndexError:
-#                 return "Packet %d is invalid for decoding. Aborting." % index
+             try:
+                 segments[index] = re.split("\|", packet, flags=re.MULTILINE)
+             except IndexError:
+                 return "Packet %d is invalid for decoding. Aborting." % index
              if segments[index][seq_num] != str(index + 1):
                  raise RuntimeWarning("Sequence number %s does not match actual order %d" % (segments[index][seq_num], index + 1))
 
