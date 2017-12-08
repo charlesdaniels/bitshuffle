@@ -149,39 +149,46 @@ def main():
 
 
 def decode(message):
-        comment, compatibility, encoding, compression, seq_num, seq_end, name, checksum, chunk = range(9)
+        comment, compatibility, encoding, compression, seq_num,
+        seq_end, name, checksum, chunk = range(9)
 
-        message = re.sub("|".join(string.whitespace) + "|>>\)\)", "", message) # delete unused whitespace and seperators
+        # delete unused whitespace and seperators
+        message = re.sub("|".join(string.whitespace) + "|>>\)\)", "", message)
         try:
             packets = re.split('\(\(<<(.*)>>\)\)', message, flags=re.MULTILINE)
         except IndexError:
             quit("Invalid packet to decode. Aborting.")
 
-        segments = [None]*len(packets) # ordered by index of packets
-        original = "" # each chunk will be appended and original will be returned
+        segments = [None] * len(packets)  # ordered by index of packets
+        # each chunk will be appended and original will be returned
+        original = ""
         for index, packet in enumerate(packets):
-             try:
-                 segments[index] = re.split("\|", packet, flags=re.MULTILINE)
-                 if segments[index][seq_num] != str(index):
-                     raise RuntimeWarning("Sequence number %s does not match actual order %d" % (segments[index][seq_num], index))
-             except IndexError:
-                 return "Packet %d is invalid for decoding. Aborting." % index
-                 print(segments[index][chunk], file=stderr)
-             reversed = base64.b64decode(segments[index][chunk])
-             original += bz2.decompress(reversed).decode('ascii')
+            try:
+                segments[index] = re.split("\|", packet, flags=re.MULTILINE)
+                if segments[index][seq_num] != str(index):
+                    raise RuntimeWarning(
+                        "Sequence number %s does not match actual order %d"
+                        % (segments[index][seq_num], index))
+            except IndexError:
+                return "Packet %d is invalid for decoding. Aborting." % index
+                print(segments[index][chunk], file=stderr)
+            reversed = base64.b64decode(segments[index][chunk])
+            original += bz2.decompress(reversed).decode('ascii')
         return verify(original.encode(), segments[index][checksum])
 
 
 def verify(data, given_hash):
     """verify:
-    Ensure that hash of data and given hash match up. Currently, only a warning is emmitted if they do not.
+    Ensure that hash of data and given hash match up.
+    Currently, only a warning is emmitted if they do not.
     :param data: byte-like object
     :param given_hash: string
     """
     if hashlib.sha1(data).hexdigest() != given_hash:
-        raise RuntimeWarning("Hashes do not match. Continuing, but you may want to investigate.", file=stderr);
-        return False;
-    return True;
+        raise RuntimeWarning(file=stderr, "Hashes do not match. " +
+                             "Continuing, but you may want to investigate.")
+        return False
+    return True
 
 
 if __name__ == "__main__":
