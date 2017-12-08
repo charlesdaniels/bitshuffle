@@ -14,6 +14,8 @@ import bz2
 import hashlib
 import re
 import string
+import subprocess
+import tempfile
 
 stderr = sys.stderr
 stdout = sys.stdout
@@ -98,8 +100,6 @@ def encode_file(fhandle, chunksize, compresslevel, filename):
 
 
 def main():
-    have_term = stdin.isatty()
-
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
@@ -141,6 +141,24 @@ def main():
                     of.write("\n")
 
     elif args.decode:
+        if stdin.isatty() and args.input is '/dev/stdin':
+            # ask the user to paste the packets into $VISUAL
+            editor = os.environ['VISUAL']
+            if editor is '':
+                editor = os.environ['EDITOR']
+            if editor is '':
+                editor = 'vi'
+
+            tmpfile = tempfile.mkstemp()[1]
+            with open(tmpfile, 'w') as tf:
+                tf.write("Paste your BitShuffle packets in this file. You " +
+                            "do not need to delete this message.\n\n")
+                tf.flush()
+            subprocess.call([editor, tmpfile])
+
+            args.input = tmpfile # make the following block use the tmpfile as
+                                 # input
+
         with open(args.input, 'rb') as f:
             payload = decode(f.read().decode('ascii'))
             with open(args.output, 'wb') as of:
@@ -174,9 +192,7 @@ def decode(message):
             reversed = base64.b64decode(segments[index][chunk])
             payload += bz2.decompress(reversed)
         checksum_ok = verify(payload, segments[0][checksum])
-        return payload 
-
-
+        return payload
 
 def verify(data, given_hash):
     """verify:
