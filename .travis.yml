@@ -1,0 +1,17 @@
+
+language: python
+python: 3.5
+
+os:
+    - linux
+
+install:
+    - pip3 install pycodestyle
+
+script:
+    - pycodestyle --ignore E221,E203 ./bitshuffle
+
+notifications:
+    email:
+        on_success: never
+        on_failure: always
