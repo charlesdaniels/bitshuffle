@@ -50,7 +50,7 @@ messaging services to denote special formatting for messages.
 The data packed is comprised of several *segments*. A *segment* begins with
 either the opening token or the ``|`` character. A segment ends with either the
 closing token or a ``|`` character. A segment may contain only the characters
-``a-zA-Z0-9``, as well as ``:``, ``/``, ``+``, ``-``. Again, keep in mind that
+``a-zA-Z0-9``, as well as ``=``, ``:``, ``/``, ``+``, ``-``. Again, keep in mind that
 whitespace is ignored entirely.
 
 The data packed contains the following segments, in order:
