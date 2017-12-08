@@ -12,11 +12,15 @@ import argparse
 import base64
 import bz2
 import hashlib
+import re
+import string
 
 stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
 
+
+message, compatibility, encoding, compression, seq_num, seq_end, checksum, chunk = range(8)
 
 def encode_data(data, chunksize, compresslevel):
     """encode_data
@@ -137,6 +141,29 @@ def main():
                 with open(args.output, 'w') as of:
                     of.write(p)
                     of.write("\n")
+
+    elif args.decode:
+        with open(args.input, 'rb') as f:
+            f = decode(f.read().decode('ascii'))
+            with open(args.output, 'w') as of:
+                    of.write(f)
+                    of.write('\n')
+
+def decode(message):
+        message = re.sub("|".join(string.whitespace), "", message)
+        try:
+            packets = re.split('\(\(<<(.*)>>\)\)', message, flags=re.MULTILINE)
+        except IndexError:
+            quit("Invalid packet to decode. Aborting.")
+
+        segments = [None]*len(packets) # ordered by index of packets
+        for index, packet in enumerate(packets):
+#             try:
+             segments[index] = re.split("\|", packet, flags=re.MULTILINE)
+#             except IndexError:
+#                 return "Packet %d is invalid for decoding. Aborting." % index
+             if segments[index][seq_num] != str(index + 1):
+                 raise RuntimeWarning("Sequence number %s does not match actual order %d" % (segments[index][seq_num], index + 1))
 
 
 if __name__ == "__main__":
