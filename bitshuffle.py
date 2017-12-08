@@ -33,18 +33,19 @@ def encode_data(data, chunksize, compresslevel):
     :param compresslevel:
     """
 
-    data = bz2.compress(data, compresslevel)
-
     chunks = []
     chunkptr = 0
     while True:
         chunk = data[chunkptr:chunkptr + chunksize - 1]
         chunkptr += chunksize
 
+        chunk = bz2.compress(chunk, compresslevel)
         chunks.append(base64.b64encode(chunk))
 
-        if chunkptr > len(data):
-            chunks.append(base64.b64encode(data[chunkptr:]))
+        if chunkptr >= len(data):
+            chunk = data[chunkptr:]
+            chunk = bz2.compress(chunk, compresslevel)
+            chunks.append(base64.b64encode(chunk))
             break
 
     chunksfinal = []
@@ -135,10 +136,13 @@ def main():
         with open(args.input, 'rb') as f:
             packets = encode_file(f, args.chunksize, args.compresslevel,
                                   args.filename)
-            for p in packets:
-                with open(args.output, 'w') as of:
+            with open(args.output, 'w') as of:
+                for p in packets:
                     of.write(p)
-                    of.write("\n")
+                    of.write("\n\n")
+
+                of.flush()
+
 
     elif args.decode:
         infile = args.input
@@ -172,33 +176,47 @@ def main():
         if is_tmp:
             os.remove(infile)
 
+
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
             seq_end, name, checksum, chunk = range(9)
 
-        # delete unused whitespace and seperators
-        message = re.sub("|".join(string.whitespace) + "|>>\)\)", "", message)
         try:
-            packets = re.split('\(\(<<(.*)>>\)\)', message, flags=re.MULTILINE)
+            packets = re.findall('\(\(<<(.*)>>\)\)', message,
+                                 flags=re.MULTILINE)
         except IndexError:
             quit("Invalid packet to decode. Aborting.")
+
+        packets_nice = []
+        for p in packets:
+            p = p.strip()
+            if p is not '':
+                # delete unused whitespace and separators
+                p = re.sub("|".join(string.whitespace), "", p)
+                packets_nice.append(p)
+
+        packets = packets_nice
 
         segments = [None] * len(packets)  # ordered by index of packets
         # each chunk will be appended and original will be returned
         payload = bytes()
         for index, packet in enumerate(packets):
             try:
-                segments[index] = re.split("\|", packet, flags=re.MULTILINE)
+                segments[index] = packet.split("|")
                 if segments[index][seq_num] != str(index):
-                    raise RuntimeWarning(
-                        "Sequence number %s does not match actual order %d"
-                        % (segments[index][seq_num], index))
+                    stderr.write("WARNING: Sequence number " +
+                            "%s does not match actual order %d\n"
+                            % (segments[index][seq_num], index))
+                    continue
             except IndexError:
-                return "Packet %d is invalid for decoding. Aborting." % index
-                print(segments[index][chunk], file=stderr)
-            reversed = base64.b64decode(segments[index][chunk])
-            payload += bz2.decompress(reversed)
+                stderr.write("WARNING: Packet " + \
+                                "%d is invalid for decoding.\n" %
+                                (index))
+                continue
+            payload += bz2.decompress(base64.b64decode(segments[index][chunk]))
+
         checksum_ok = verify(payload, segments[0][checksum])
+        payload = bytes(payload)
         return payload
 
 
@@ -210,8 +228,8 @@ def verify(data, given_hash):
     :param given_hash: string
     """
     if hashlib.sha1(data).hexdigest() != given_hash:
-        raise RuntimeWarning("Hashes do not match. Continuing, but you " +
-                             "may want to investigate.", file=stderr)
+        stderr.write("WARNING: Hashes do not match. Continuing, but you " +
+                             "may want to investigate.\n")
         return False
     return True
 
