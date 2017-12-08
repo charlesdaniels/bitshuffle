@@ -61,7 +61,7 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
     :param data:
     """
 
-    msg = "this is an informative message"
+    msg = "This is a BitShuffle encoded file, download BitShuffle from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
     compression = "bz2"
@@ -101,6 +101,9 @@ def main():
     parser.add_argument("--output", "-o", default="/dev/stdout",
                             help="Output file. Default is stdout.")
 
+    parser.add_argument("--filename", "-f", default=None,
+                            help="Set filename to use when encoding explicitly")
+
     iochoice = parser.add_mutually_exclusive_group(required=True)
 
     iochoice.add_argument("--encode", "-e", action="store_true",
@@ -118,11 +121,12 @@ def main():
 
     args = parser.parse_args()
 
-    filename = os.path.basename(args.input)
+    if args.filename is None:
+        args.filename = os.path.basename(args.input)
 
     if args.encode:
         with open(args.input, 'rb') as f:
-            encode_file(f, args.chunksize, args.compresslevel, filename)
+            encode_file(f, args.chunksize, args.compresslevel, args.filename)
 
 
 
