@@ -15,8 +15,35 @@ import bz2
 stderr = sys.stderr
 stdout = sys.stdout
 
+def encode_file(fhandle, chunksize, compresslevel):
+    """encode_file
+
+    Encode the file from fhandle and return a list of strings containing
+    BitShuffle data packets.
+
+    :param fhandle:
+    """
+
+    data = bz2.compress(fhandle.read(), compresslevel)
+
+    chunks = []
+    chunkptr = 0
+    while True:
+        chunk = data[chunkptr:chunkptr + chunksize - 1]
+        chunkptr += chunksize
+
+        chunks.append(chunk)
+
+        if chunkptr > len(data):
+            chunks.append(data[chunkptr:])
+            break
+
+    for c in chunks:
+        sys.stderr.write("chunk: '{}'\n".format(c))
 
 def main():
+    """encode_file"""
+    """encode_file"""
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
@@ -31,7 +58,20 @@ def main():
     iochoice.add_argument("--decode", "-d", "-D", action="store_true",
                             help="Extract a BitShuffle data packet.")
 
+    parser.add_argument("--chunksize", "-c", type=int, default=32,
+                            help="Chunk size in bytes")
+
+    parser.add_argument("--compresslevel", '-m', type=int, default=9,
+                            help="bz2 compression level when encoding")
+
     args = parser.parse_args()
+
+    if args.encode:
+        with open(args.input, 'rb') as f:
+            encode_file(f, args.chunksize, args.compresslevel)
+
+
+
 
 
 if __name__ == "__main__":
