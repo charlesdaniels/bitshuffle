@@ -14,6 +14,7 @@ import bz2
 
 stderr = sys.stderr
 stdout = sys.stdout
+stdin = sys.stdin
 
 def encode_file(fhandle, chunksize, compresslevel):
     """encode_file
@@ -42,12 +43,14 @@ def encode_file(fhandle, chunksize, compresslevel):
         sys.stderr.write("chunk: '{}'\n".format(c))
 
 def main():
-    """encode_file"""
-    """encode_file"""
+    have_term = stdin.isatty()
+
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
-                            help="Input file. Default is stdin")
+                            help="Input file. Default is stdin.")
+    parser.add_argument("--output", "-o", default="/dev/stdout",
+                            help="Output file. Default is stdout.")
 
     iochoice = parser.add_mutually_exclusive_group(required=True)
 
