@@ -142,15 +142,14 @@ def main():
 
     elif args.decode:
         with open(args.input, 'rb') as f:
-            f = decode(f.read().decode('ascii'))
-            with open(args.output, 'w') as of:
-                    of.write(f)
-                    of.write('\n')
+            payload = decode(f.read().decode('ascii'))
+            with open(args.output, 'wb') as of:
+                    of.write(payload)
 
 
 def decode(message):
-        comment, compatibility, encoding, compression, seq_num,
-        seq_end, name, checksum, chunk = range(9)
+        comment, compatibility, encoding, compression, seq_num, \
+            seq_end, name, checksum, chunk = range(9)
 
         # delete unused whitespace and seperators
         message = re.sub("|".join(string.whitespace) + "|>>\)\)", "", message)
@@ -161,7 +160,7 @@ def decode(message):
 
         segments = [None] * len(packets)  # ordered by index of packets
         # each chunk will be appended and original will be returned
-        original = ""
+        payload = bytes()
         for index, packet in enumerate(packets):
             try:
                 segments[index] = re.split("\|", packet, flags=re.MULTILINE)
@@ -173,8 +172,10 @@ def decode(message):
                 return "Packet %d is invalid for decoding. Aborting." % index
                 print(segments[index][chunk], file=stderr)
             reversed = base64.b64decode(segments[index][chunk])
-            original += bz2.decompress(reversed).decode('ascii')
-        return verify(original.encode(), segments[index][checksum])
+            payload += bz2.decompress(reversed)
+        checksum_ok = verify(payload, segments[0][checksum])
+        return payload 
+
 
 
 def verify(data, given_hash):
@@ -185,8 +186,8 @@ def verify(data, given_hash):
     :param given_hash: string
     """
     if hashlib.sha1(data).hexdigest() != given_hash:
-        raise RuntimeWarning(file=stderr, "Hashes do not match. " +
-                             "Continuing, but you may want to investigate.")
+        raise RuntimeWarning("Hashes do not match. Continuing, but you " +
+                                "may want to investigate.", file=stderr)
         return False
     return True
 
