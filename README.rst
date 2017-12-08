@@ -63,6 +63,7 @@ The data packed contains the following segments, in order:
 * BitShuffle packet sequence number (i.e. `23`).
 * BitShuffle packet sequence end (the sequence number of the last packet in the
   message).
+* Name of encoded file
 * BitShuffle data checksum (encoded)
 * BitShuffle data chunk (encoded)
 
@@ -73,6 +74,6 @@ specified encoding format.
 
 An example of a BitStream data packet might be::
 
-        ((<<an informative message|1|base64|bz2|1|1|encoded checksum|encoded data chunk>>))
+        ((<<an informative message|1|base64|bz2|1|1|coolstuf.zip|encoded checksum|encoded data chunk>>))
 
 
