@@ -33,18 +33,18 @@ def encode_data(data, chunksize, compresslevel):
     :param compresslevel:
     """
 
+    data = bz2.compress(data)
+
     chunks = []
     chunkptr = 0
     while True:
         chunk = data[chunkptr:chunkptr + chunksize]
         chunkptr += chunksize
 
-        chunk = bz2.compress(chunk, compresslevel)
         chunks.append(base64.b64encode(chunk))
 
         if chunkptr >= len(data):
             chunk = data[chunkptr:]
-            chunk = bz2.compress(chunk, compresslevel)
             chunks.append(base64.b64encode(chunk))
             break
 
@@ -143,7 +143,6 @@ def main():
 
                 of.flush()
 
-
     elif args.decode:
         infile = args.input
         # set to True for infile to be deleted after decoding
@@ -205,16 +204,18 @@ def decode(message):
                 segments[index] = packet.split("|")
                 if segments[index][seq_num] != str(index):
                     stderr.write("WARNING: Sequence number " +
-                            "%s does not match actual order %d\n"
-                            % (segments[index][seq_num], index))
+                                 "%s does not match actual order %d\n"
+                                 % (segments[index][seq_num], index))
                     continue
             except IndexError:
-                stderr.write("WARNING: Packet " + \
-                                "%d is invalid for decoding.\n" %
-                                (index))
+                stderr.write("WARNING: Packet " +
+                             "%d is invalid for decoding.\n" %
+                             (index))
                 continue
-            payload += bz2.decompress(base64.b64decode(segments[index][chunk]))
 
+            payload += base64.b64decode(segments[index][chunk])
+
+        payload = bz2.decompress(payload)
         checksum_ok = verify(payload, segments[0][checksum])
         payload = bytes(payload)
         return payload
@@ -229,7 +230,7 @@ def verify(data, given_hash):
     """
     if hashlib.sha1(data).hexdigest() != given_hash:
         stderr.write("WARNING: Hashes do not match. Continuing, but you " +
-                             "may want to investigate.\n")
+                     "may want to investigate.\n")
         return False
     return True
 
