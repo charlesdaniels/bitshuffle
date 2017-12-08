@@ -17,6 +17,7 @@ stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
 
+
 def encode_data(data, chunksize, compresslevel):
     """encode_data
 
@@ -49,6 +50,7 @@ def encode_data(data, chunksize, compresslevel):
 
     return chunksfinal
 
+
 def encode_packet(data, filename, checksum, seqnum, seqmax):
     """encode_packet
 
@@ -58,15 +60,18 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
     :param data:
     """
 
-    msg = "This is a BitShuffle encoded file, download BitShuffle from https://github.com/charlesdaniels/bitshuffle"
+    msg = "This is a BitShuffle encoded file, download BitShuffle " + \
+        "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
     compression = "bz2"
     data = data.decode(encoding="ascii")
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
-    packet = fmt.format(msg, compatlevel, encoding, compression, seqnum, seqmax, filename, checksum, data)
+    packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
+                        seqmax, filename, checksum, data)
     return packet
+
 
 def encode_file(fhandle, chunksize, compresslevel, filename):
     """encode_file
@@ -89,33 +94,35 @@ def encode_file(fhandle, chunksize, compresslevel, filename):
 
     return packets
 
+
 def main():
     have_term = stdin.isatty()
 
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
-                            help="Input file. Default is stdin.")
+                        help="Input file. Default is stdin.")
     parser.add_argument("--output", "-o", default="/dev/stdout",
-                            help="Output file. Default is stdout.")
+                        help="Output file. Default is stdout.")
 
     parser.add_argument("--filename", "-f", default=None,
-                            help="Set filename to use when encoding explicitly")
+                        help="Set filename to use when encoding " +
+                        "explicitly")
 
     iochoice = parser.add_mutually_exclusive_group(required=True)
 
     iochoice.add_argument("--encode", "-e", action="store_true",
-                            help="Generate a BitShuffle data packet from " +
-                            "the input file")
+                          help="Generate a BitShuffle data packet from " +
+                          "the input file")
 
     iochoice.add_argument("--decode", "-d", "-D", action="store_true",
-                            help="Extract a BitShuffle data packet.")
+                          help="Extract a BitShuffle data packet.")
 
     parser.add_argument("--chunksize", "-c", type=int, default=2048,
-                            help="Chunk size in bytes")
+                        help="Chunk size in bytes")
 
     parser.add_argument("--compresslevel", '-m', type=int, default=5,
-                            help="bz2 compression level when encoding")
+                        help="bz2 compression level when encoding")
 
     args = parser.parse_args()
 
@@ -124,11 +131,13 @@ def main():
 
     if args.encode:
         with open(args.input, 'rb') as f:
-            packets = encode_file(f, args.chunksize, args.compresslevel, args.filename)
+            packets = encode_file(f, args.chunksize, args.compresslevel,
+                                  args.filename)
             for p in packets:
                 with open(args.output, 'w') as of:
                     of.write(p)
                     of.write("\n")
 
+
 if __name__ == "__main__":
-	main()
+    main()
