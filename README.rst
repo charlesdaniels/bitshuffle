@@ -2,6 +2,14 @@
 BitShuffle README
 #################
 
+.. contents::
+
+Build Status
+============
+
+.. image:: https://travis-ci.org/charlesdaniels/bitshuffle.svg?branch=master
+    :target: https://travis-ci.org/charlesdaniels/bitshuffle
+
 Introduction
 ============
 
