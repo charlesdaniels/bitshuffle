@@ -14,13 +14,17 @@ import bz2
 
 stderr = sys.stderr
 stdout = sys.stdout
-
+stdin = sys.stdin
 
 def main():
+    have_term = stdin.isatty()
+
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
                             help="Input file. Default is stdin")
+    parser.add_argument("--output", "-o", default="/dev/stdout")
+
 
     iochoice = parser.add_mutually_exclusive_group(required=True)
 
@@ -32,6 +36,8 @@ def main():
                             help="Extract a BitShuffle data packet.")
 
     args = parser.parse_args()
+
+    
 
 
 if __name__ == "__main__":
