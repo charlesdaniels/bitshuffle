@@ -152,12 +152,12 @@ def main():
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
                 tf.write("Paste your BitShuffle packets in this file. You " +
-                            "do not need to delete this message.\n\n")
+                         "do not need to delete this message.\n\n")
                 tf.flush()
             subprocess.call([editor, tmpfile])
 
-            args.input = tmpfile # make the following block use the tmpfile as
-                                 # input
+            # this forces the newly created tempfile to be used as the input
+            args.input = tmpfile
 
         with open(args.input, 'rb') as f:
             payload = decode(f.read().decode('ascii'))
@@ -194,6 +194,7 @@ def decode(message):
         checksum_ok = verify(payload, segments[0][checksum])
         return payload
 
+
 def verify(data, given_hash):
     """verify:
     Ensure that hash of data and given hash match up.
@@ -203,7 +204,7 @@ def verify(data, given_hash):
     """
     if hashlib.sha1(data).hexdigest() != given_hash:
         raise RuntimeWarning("Hashes do not match. Continuing, but you " +
-                                "may want to investigate.", file=stderr)
+                             "may want to investigate.", file=stderr)
         return False
     return True
 
