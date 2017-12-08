@@ -22,9 +22,9 @@ def main():
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
-                            help="Input file. Default is stdin")
-    parser.add_argument("--output", "-o", default="/dev/stdout")
-
+                            help="Input file. Default is stdin.")
+    parser.add_argument("--output", "-o", default="/dev/stdout",
+                            help="Output file. Default is stdout.")
 
     iochoice = parser.add_mutually_exclusive_group(required=True)
 
