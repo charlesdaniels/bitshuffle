@@ -28,9 +28,7 @@ def encode_data(data, chunksize, compresslevel):
     :param compresslevel:
     """
 
-    stderr.write("{} bytes -> ".format(len(data)))
     data = bz2.compress(data, compresslevel)
-    stderr.write("{} bytes (compressed)".format(len(data)))
 
     chunks = []
     chunkptr = 0
@@ -46,7 +44,6 @@ def encode_data(data, chunksize, compresslevel):
 
     chunksfinal = []
     for c in chunks:
-        sys.stderr.write("chunk: '{}'\n".format(c))
         if len(c) > 0:
             chunksfinal.append(c)
 
@@ -85,11 +82,12 @@ def encode_file(fhandle, chunksize, compresslevel, filename):
     chunks = encode_data(data, chunksize, compresslevel)
     seqmax = len(chunks) - 1
     seqnum = 0
+    packets = []
     for c in chunks:
-        stderr.write("packet: {}\n".format(encode_packet(c, filename, checksum, seqnum, seqmax)))
+        packets.append(encode_packet(c, filename, checksum, seqnum, seqmax))
         seqnum += 1
 
-
+    return packets
 
 def main():
     have_term = stdin.isatty()
@@ -113,10 +111,10 @@ def main():
     iochoice.add_argument("--decode", "-d", "-D", action="store_true",
                             help="Extract a BitShuffle data packet.")
 
-    parser.add_argument("--chunksize", "-c", type=int, default=32,
+    parser.add_argument("--chunksize", "-c", type=int, default=2048,
                             help="Chunk size in bytes")
 
-    parser.add_argument("--compresslevel", '-m', type=int, default=1,
+    parser.add_argument("--compresslevel", '-m', type=int, default=5,
                             help="bz2 compression level when encoding")
 
     args = parser.parse_args()
@@ -126,11 +124,11 @@ def main():
 
     if args.encode:
         with open(args.input, 'rb') as f:
-            encode_file(f, args.chunksize, args.compresslevel, args.filename)
-
-
-
-
+            packets = encode_file(f, args.chunksize, args.compresslevel, args.filename)
+            for p in packets:
+                with open(args.output, 'w') as of:
+                    of.write(p)
+                    of.write("\n")
 
 if __name__ == "__main__":
 	main()
