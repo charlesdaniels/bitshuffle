@@ -170,6 +170,8 @@ def main():
                         help="Type of compression to use when encoding. "
                              "Defaults to bz2. " +
                              "Currently supported: 'bz2', 'gzip'")
+    parser.add_argument("--editor", "-E",
+                        help="Editor to use for pasting packets")
 
     args = parser.parse_args()
 
@@ -216,6 +218,24 @@ def main():
         if stdin.isatty() and args.input == '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
+            if args.editor:
+                editor = args.editor
+            elif 'VISUAL' in os.environ:
+                editor = os.environ['VISUAL']
+            elif 'EDITOR' in os.environ:
+                editor = os.environ['EDITOR']
+            else:
+                for program in ['mimeopen', 'nano', 'vi', 'emacs',
+                                'micro', 'notepad', 'notepad++']:
+                    editor = which(program)
+                    if editor is not None:  # something worked
+                        break
+
+                if editor is None:
+                    quit("Could not find a suitable editor." +
+                         "Please specify with '--editor'" +
+                         "or set the EDITOR variable in your shell.")
+            stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
