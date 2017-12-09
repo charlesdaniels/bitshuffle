@@ -8,7 +8,8 @@
 
 PARENT_DIR="$(dirname "$0")"
 BITSHUFFLE="$PARENT_DIR/../bitshuffle.py"
-
+BITSHUFFLE2="python2 $BITSHUFFLE"
+BITSHUFFLE3="python3 $BITSHUFFLE"
 if [ ! -x "$BITSHUFFLE" ] ; then
 	echo "FATAL: '$BITSHUFFLE' does not exist"
 	exit 9999
@@ -31,8 +32,8 @@ do_test () {
 	if [ "$TEMPFILE_DST_SHA" = "$TEMPFILE_SRC_SHA" ] ; then
 		echo "PASSED"
 	else
-		echo "FAILED"
-		echo
+		printf "FAILED\n\n"
+
 		printf "\t$TEMPFILE_SRC_SHA does not match $TEMPFILE_DST_SHA\n"
 		echo
 		while read -r ln  ; do
@@ -46,30 +47,40 @@ do_test () {
 	rm -f "$TEMPFILE_DST"
 }
 
+all_tests () {
+
+    printf "Basic encode/decode test... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+    printf "Basic encode/decode test (large chunk size)... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+
+    printf "Basic encode/decode test (small chunk size)... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 8 | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+
+    printf "Double encode/decode test... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+}
+
 echo "Running tests..."
 
 TESTS_FAILED=0
 
-printf "Basic encode/decode test... "
-do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" | \
-	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+printf "\nRunning Python2 tests...\n"
+BITSHUFFLE="$BITSHUFFLE2"
+all_tests
 
-printf "Basic encode/decode test (large chunk size)... "
-do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
-	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+printf "\nRunning Python3 tests...\n"
+BITSHUFFLE="$BITSHUFFLE3"
+all_tests
 
-
-printf "Basic encode/decode test (small chunk size)... "
-do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" --chunksize 8 | \
-	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
-
-
-printf "Double encode/decode test... "
-do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" | \
-	"$BITSHUFFLE" --encode | "$BITSHUFFLE" --decode | \
-	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
-
-
-echo
-echo "$TESTS_FAILED tests failed"
+printf "\n$TESTS_FAILED tests failed\n"
 exit $TESTS_FAILED
