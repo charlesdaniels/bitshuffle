@@ -169,7 +169,7 @@ def main():
             else:
                 for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro']:
                     editor = which(program)
-                    if editor != '':  # something worked
+                    if editor is not None:  # something worked
                         break
 
             if editor is None:
