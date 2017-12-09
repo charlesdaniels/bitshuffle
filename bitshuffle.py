@@ -167,7 +167,7 @@ def main():
             elif 'EDITOR' in os.environ:
                 editor = os.environ['EDITOR']
             else:
-                for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro']:
+                for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro', 'notepad', 'notepad++']:
                     editor = which(program)
                     if editor is not None:  # something worked
                         break
