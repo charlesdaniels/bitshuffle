@@ -24,7 +24,7 @@ classifiers = [
     'Environment :: Console',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: BSD License',
-    'Operating System :: POSIX'
+    'Operating System :: POSIX',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
