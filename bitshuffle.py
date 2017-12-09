@@ -17,6 +17,11 @@ import string
 import subprocess
 import tempfile
 
+try:
+    from shutil import which
+except ImportError:  # python2
+    from distutils.spawn import find_executable as which
+
 stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
@@ -65,7 +70,7 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
     :param data:
     """
 
-    msg = "This is a BitShuffle encoded file, download BitShuffle " + \
+    msg = "\nThis is encoded with BitShuffle, which you can download " + \
         "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
@@ -127,6 +132,9 @@ def main():
     parser.add_argument("--compresslevel", '-m', type=int, default=5,
                         help="bz2 compression level when encoding")
 
+    parser.add_argument("--editor", "-E", default="",
+                        help="Editor to use for pasting packets")
+
     args = parser.parse_args()
 
     if args.filename is None:
@@ -150,11 +158,23 @@ def main():
         if stdin.isatty() and args.input is '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
-            editor = os.environ['VISUAL']
-            if editor is '':
+            if args.editor:
+                editor = args.editor
+            elif 'VISUAL' in os.environ:
+                editor = os.environ['VISUAL']
+            elif 'EDITOR' in os.environ:
                 editor = os.environ['EDITOR']
-            if editor is '':
-                editor = 'vi'
+            else:
+                for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro']:
+                    editor = which(program)
+                    if editor != '':  # something worked
+                        break
+
+            if editor == '':
+                quit("Could not find a suitable editor." +
+                     "Please specify with '--editor'" +
+                     "or set the EDITOR variable in your shell.")
+            stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
@@ -163,7 +183,7 @@ def main():
                 tf.flush()
             subprocess.call([editor, tmpfile])
 
-            stderr.write("finished editing\n")
+            stderr.write("Finished editing\n")
 
             infile = tmpfile
 
@@ -185,6 +205,9 @@ def decode(message):
                                  flags=re.MULTILINE)
         except IndexError:
             quit("Invalid packet to decode. Aborting.")
+
+        if len(packets) == 0:
+            quit("Nothing to decrypt or nothing matched spec. Aborting.")
 
         packets_nice = []
         for p in packets:
