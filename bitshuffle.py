@@ -16,6 +16,7 @@ import re
 import string
 import subprocess
 import tempfile
+import select
 
 try:
     from shutil import which
@@ -25,6 +26,10 @@ except ImportError:  # python2
 stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
+
+
+# Change this version variable to change the --version output
+program_version = 1.0
 
 
 def encode_data(data, chunksize, compresslevel):
@@ -117,14 +122,15 @@ def main():
                         help="Set filename to use when encoding " +
                         "explicitly")
 
-    iochoice = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument("--encode", "-e", action="store_true",
+                        help="Generate a BitShuffle data packet from" +
+                             "the input file")
 
-    iochoice.add_argument("--encode", "-e", action="store_true",
-                          help="Generate a BitShuffle data packet from " +
-                          "the input file")
+    parser.add_argument("--decode", "-d", "-D", action="store_true",
+                        help="Extract a BitShuffle data packet.")
 
-    iochoice.add_argument("--decode", "-d", "-D", action="store_true",
-                          help="Extract a BitShuffle data packet.")
+    parser.add_argument("--version", "-v", action="store_true",
+                        help="Displays the current version of bitshuffle")
 
     parser.add_argument("--chunksize", "-c", type=int, default=2048,
                         help="Chunk size in bytes")
@@ -137,21 +143,48 @@ def main():
 
     args = parser.parse_args()
 
+    # Checks if no parameters were passed so the help can be printed
+    if len(sys.argv[1:]) == 0:
+        parser.print_help()
+        exit(0)
+
+    if args.version:
+        print("Version: bitshuffle v{0}".format(program_version))
+        exit(0)
+
     if args.filename is None:
         args.filename = os.path.basename(args.input)
 
+    # Encode & Decode smart inference
+    if not args.encode and not args.decode:
+        # Assume Decode
+        if args.output and args.input == '/dev/stdin':
+            if stdin.isatty():
+                # Infers decode
+                args.decode = True
+
+        # Assume Encode
+        if args.input and args.output == '/dev/stdout':
+            if not args.input == '/dev/stdin':
+                # Infers encode
+                args.encode = True
+
     if args.encode:
-        with open(args.input, 'rb') as f:
-            packets = encode_file(f, args.chunksize, args.compresslevel,
-                                  args.filename)
-            with open(args.output, 'w') as of:
-                for p in packets:
-                    of.write(p)
-                    of.write("\n\n")
 
-                of.flush()
+        if check_for_file(args.input):
+            with open(args.input, 'rb') as f:
+                packets = encode_file(f, args.chunksize, args.compresslevel,
+                                      args.filename)
+                with open(args.output, 'w') as of:
+                    for p in packets:
+                        of.write(p)
+                        of.write("\n\n")
 
+                    of.flush()
+        else:
+            quit('Error: Input file not found')
     elif args.decode:
+
         infile = args.input
         # set to True for infile to be deleted after decoding
         is_tmp = False
@@ -253,6 +286,14 @@ def verify(data, given_hash):
                      "may want to investigate.\n")
         return False
     return True
+
+
+def check_for_file(filename):
+    try:
+        open(filename)
+        return True
+    except FileNotFoundError:
+        return False
 
 
 if __name__ == "__main__":
