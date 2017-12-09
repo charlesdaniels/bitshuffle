@@ -172,7 +172,7 @@ def main():
                     if editor != '':  # something worked
                         break
 
-            if editor == '':
+            if editor is None:
                 quit("Could not find a suitable editor." +
                      "Please specify with '--editor'" +
                      "or set the EDITOR variable in your shell.")
