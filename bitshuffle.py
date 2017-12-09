@@ -123,7 +123,8 @@ def main():
                         "explicitly")
 
     parser.add_argument("--encode", "-e", action="store_true",
-                        help="Generate a BitShuffle data packet from the input file")
+                        help="Generate a BitShuffle data packet from"
+                             + "the input file")
 
     parser.add_argument("--decode", "-d", "-D", action="store_true",
                         help="Extract a BitShuffle data packet.")
@@ -293,6 +294,7 @@ def check_for_file(filename):
         return True
     except FileNotFoundError:
         return False
+
 
 if __name__ == "__main__":
     main()
