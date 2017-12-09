@@ -175,10 +175,10 @@ def main():
 
                 if editor is None:
                     print("Could not find a suitable editor." +
-                         "Please specify with '--editor'" +
-                         "or set the EDITOR variable in your shell.")
+                          "Please specify with '--editor'" +
+                          "or set the EDITOR variable in your shell.")
                     sys.exit(1)
-                    
+
             stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
@@ -201,6 +201,7 @@ def main():
             sys.exit(0)
         else:
             sys.exit(8)
+
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
