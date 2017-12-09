@@ -70,7 +70,7 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
     :param data:
     """
 
-    msg = "\nThis is encoded with BitShuffle, which you can download " + \
+    msg = "This is encoded with BitShuffle, which you can download " + \
         "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
@@ -182,9 +182,6 @@ def main():
                          "do not need to delete this message.\n\n")
                 tf.flush()
             subprocess.call([editor, tmpfile])
-
-            stderr.write("Finished editing\n")
-
             infile = tmpfile
 
         with open(infile, 'r') as f:
@@ -207,7 +204,7 @@ def decode(message):
             quit("Invalid packet to decode. Aborting.")
 
         if len(packets) == 0:
-            quit("Nothing to decrypt or nothing matched spec. Aborting.")
+            quit("Nothing to decode or nothing matched spec. Aborting.")
 
         packets_nice = []
         for p in packets:
