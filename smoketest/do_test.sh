@@ -46,7 +46,7 @@ do_test () {
 	rm -f "$TEMPFILE_DST"
 }
 
-printf "Running tests...\n"
+echo "Running tests..."
 
 TESTS_FAILED=0
 
@@ -63,6 +63,13 @@ printf "Basic encode/decode test (small chunk size)... "
 do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" --chunksize 8 | \
 	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
-printf "\n"
-printf "$TESTS_FAILED tests failed\n"
+
+printf "Double encode/decode test... "
+do_test '"$BITSHUFFLE" --encode --input "$TEMPFILE_SRC" | \
+	"$BITSHUFFLE" --encode | "$BITSHUFFLE" --decode | \
+	"$BITSHUFFLE" --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+
+echo
+echo "$TESTS_FAILED tests failed"
 exit $TESTS_FAILED
