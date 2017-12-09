@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # .SHELLDOC
 #
@@ -7,10 +7,12 @@
 # .ENDOC
 
 import os
+import io
 import sys
 import argparse
 import base64
 import bz2
+import gzip
 import hashlib
 import re
 import string
@@ -23,16 +25,36 @@ try:
 except ImportError:  # python2
     from distutils.spawn import find_executable as which
 
+try:
+    gzip_compress = gzip.compress
+    gzip_decompress = gzip.decompress
+except AttributeError:  # python2
+    # taken straight from gzip.py
+    def gzip_compress(data, compresslevel=5):
+        buf = io.BytesIO()
+        c = compresslevel
+        with gzip.GzipFile(fileobj=buf, mode='wb', compresslevel=c) as f:
+            f.write(data)
+        return buf.getvalue()
+
+    def gzip_decompress(data):
+        with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
+            return f.read()
+
+
+version = '0.0.1'
+
 stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
+compress = None
 
 
 # Change this version variable to change the --version output
-program_version = 1.0
+program_version = '0.0.1'
 
 
-def encode_data(data, chunksize, compresslevel):
+def encode_data(data, chunksize, compresslevel, compresstype):
     """encode_data
 
     Compress the given data (which should be bytes), chunk it into chunksize
@@ -43,7 +65,10 @@ def encode_data(data, chunksize, compresslevel):
     :param compresslevel:
     """
 
-    data = bz2.compress(data)
+    if compresstype == 'bz2':
+        data = bz2.compress(data, compresslevel=compresslevel)
+    else:
+        data = gzip_compress(data, compresslevel=compresslevel)
 
     chunks = []
     chunkptr = 0
@@ -66,7 +91,7 @@ def encode_data(data, chunksize, compresslevel):
     return chunksfinal
 
 
-def encode_packet(data, filename, checksum, seqnum, seqmax):
+def encode_packet(data, filename, checksum, seqnum, seqmax, compression):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -79,7 +104,6 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
         "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
-    compression = "bz2"
     data = data.decode(encoding="ascii")
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
@@ -88,7 +112,7 @@ def encode_packet(data, filename, checksum, seqnum, seqmax):
     return packet
 
 
-def encode_file(fhandle, chunksize, compresslevel, filename):
+def encode_file(fhandle, chunksize, compresslevel, compresstype, filename):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -99,12 +123,13 @@ def encode_file(fhandle, chunksize, compresslevel, filename):
 
     data = fhandle.read()
     checksum = hashlib.sha1(data).hexdigest()
-    chunks = encode_data(data, chunksize, compresslevel)
+    chunks = encode_data(data, chunksize, compresslevel, compresstype)
     seqmax = len(chunks) - 1
     seqnum = 0
     packets = []
     for c in chunks:
-        packets.append(encode_packet(c, filename, checksum, seqnum, seqmax))
+        packets.append(encode_packet(c, filename, checksum, seqnum,
+                                     seqmax, compresstype))
         seqnum += 1
 
     return packets
@@ -115,6 +140,7 @@ def main():
 
     parser.add_argument("--input", "-i", default="/dev/stdin",
                         help="Input file. Default is stdin.")
+
     parser.add_argument("--output", "-o", default="/dev/stdout",
                         help="Output file. Default is stdout.")
 
@@ -136,10 +162,16 @@ def main():
                         help="Chunk size in bytes")
 
     parser.add_argument("--compresslevel", '-m', type=int, default=5,
-                        help="bz2 compression level when encoding")
+                        help="Compression level when encoding. " +
+                        "1 is lowest, 9 is highest")
 
-    parser.add_argument("--editor", "-E", default="",
+    parser.add_argument("--editor", "-E",
                         help="Editor to use for pasting packets")
+
+    parser.add_argument("--compresstype", '-t', default="bz2",
+                        help="Type of compression to use. Defaults to bz2. " +
+                             "Ignored if decoding packets. " +
+                             "Currently supported: 'bz2', 'gzip'")
 
     args = parser.parse_args()
 
@@ -155,13 +187,18 @@ def main():
     if args.filename is None:
         args.filename = os.path.basename(args.input)
 
-    # Encode & Decode smart inference
-    if not args.encode and not args.decode:
-        # Assume Decode
-        if args.output and args.input == '/dev/stdin':
-            if stdin.isatty():
-                # Infers decode
-                args.decode = True
+    if args.encode:
+        if args.compresstype not in ['bz2', 'gzip']:
+            parser.print_help()
+            sys.exit(1)
+
+        with open(args.input, 'rb') as f:
+            packets = encode_file(f, args.chunksize, args.compresslevel,
+                                  args.compresstype, args.filename)
+            with open(args.output, 'w') as of:
+                for p in packets:
+                    of.write(p)
+                    of.write("\n\n")
 
         # Assume Encode
         if args.input and args.output == '/dev/stdout':
@@ -174,7 +211,7 @@ def main():
         if check_for_file(args.input):
             with open(args.input, 'rb') as f:
                 packets = encode_file(f, args.chunksize, args.compresslevel,
-                                      args.filename)
+                                      args.compresstype , args.filename)
                 with open(args.output, 'w') as of:
                     for p in packets:
                         of.write(p)
@@ -191,22 +228,7 @@ def main():
         if stdin.isatty() and args.input is '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
-            if args.editor:
-                editor = args.editor
-            elif 'VISUAL' in os.environ:
-                editor = os.environ['VISUAL']
-            elif 'EDITOR' in os.environ:
-                editor = os.environ['EDITOR']
-            else:
-                for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro']:
-                    editor = which(program)
-                    if editor != '':  # something worked
-                        break
-
-            if editor == '':
-                quit("Could not find a suitable editor." +
-                     "Please specify with '--editor'" +
-                     "or set the EDITOR variable in your shell.")
+            editor = get_editor(args)
             stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
@@ -218,12 +240,37 @@ def main():
             infile = tmpfile
 
         with open(infile, 'r') as f:
-            payload = decode(f.read())
+            payload, checksum_ok = decode(f.read())
             with open(args.output, 'wb') as of:
                     of.write(payload)
 
         if is_tmp:
             os.remove(infile)
+
+        if checksum_ok:
+            sys.exit(0)
+        else:
+            sys.exit(8)
+
+
+def get_editor(args):
+    if args.editor:
+        return args.editor
+    elif 'VISUAL' in os.environ:
+        return os.environ['VISUAL']
+    elif 'EDITOR' in os.environ:
+        return os.environ['EDITOR']
+    else:
+        for program in ['mimeopen', 'nano', 'vi', 'emacs',
+                        'micro', 'notepad', 'notepad++']:
+            editor = which(program)
+            if editor is not None:
+                return editor
+
+    print("Could not find a suitable editor." +
+          "Please specify with '--editor'" +
+          "or set the EDITOR variable in your shell.")
+    sys.exit(1)
 
 
 def decode(message):
@@ -234,10 +281,12 @@ def decode(message):
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
                                  flags=re.MULTILINE)
         except IndexError:
-            quit("Invalid packet to decode. Aborting.")
+            print("Invalid packet to decode. Aborting.")
+            sys.exit(2)
 
         if len(packets) == 0:
-            quit("Nothing to decode or nothing matched spec. Aborting.")
+            print("Nothing to decode or nothing matched spec. Aborting.")
+            sys.exit(2)
 
         packets_nice = []
         for p in packets:
@@ -268,10 +317,14 @@ def decode(message):
 
             payload += base64.b64decode(segments[index][chunk])
 
-        payload = bz2.decompress(payload)
+        if segments[0][compression] == "bz2":
+            payload = bz2.decompress(payload)
+        else:
+            payload = gzip_decompress(payload)
+
         checksum_ok = verify(payload, segments[0][checksum])
         payload = bytes(payload)
-        return payload
+        return payload, checksum_ok
 
 
 def verify(data, given_hash):
