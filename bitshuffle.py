@@ -22,6 +22,8 @@ try:
 except ImportError:  # python2
     from distutils.spawn import find_executable as which
 
+version = '0.0.1'
+
 stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
