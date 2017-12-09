@@ -39,6 +39,13 @@ These services are designed specifically for transferring plain text data, and
 often mangle binary data. They usually have size limitations, and do not
 support multiple files.
 
+CONTRIBUTING
+---
+
+The only thing needed to run the executable is python (2 or 3). However,
+the tests require `bc`, `uuidgen`, and `shasum`. On debian-based systems, these
+can be installed with `sudo apt-get install bc uuid-runtime coreutils`.
+
 BitShuffel Data Packet Specification
 ====================================
 
