@@ -170,8 +170,6 @@ def main():
                         help="Type of compression to use when encoding. "
                              "Defaults to bz2. " +
                              "Currently supported: 'bz2', 'gzip'")
-    parser.add_argument("--editor", "-E",
-                        help="Editor to use for pasting packets")
 
     args = parser.parse_args()
 
@@ -232,9 +230,11 @@ def main():
                         break
 
                 if editor is None:
-                    quit("Could not find a suitable editor." +
-                         "Please specify with '--editor'" +
-                         "or set the EDITOR variable in your shell.")
+                    print("Could not find a suitable editor." +
+                          "Please specify with '--editor'" +
+                          "or set the EDITOR variable in your shell.")
+                    sys.exit(1)
+
             stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
