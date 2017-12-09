@@ -174,9 +174,11 @@ def main():
                         break
 
                 if editor is None:
-                    quit("Could not find a suitable editor." +
+                    print("Could not find a suitable editor." +
                          "Please specify with '--editor'" +
                          "or set the EDITOR variable in your shell.")
+                    sys.exit(1)
+                    
             stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
@@ -188,13 +190,17 @@ def main():
             infile = tmpfile
 
         with open(infile, 'r') as f:
-            payload = decode(f.read())
+            payload, checksum_ok = decode(f.read())
             with open(args.output, 'wb') as of:
                     of.write(payload)
 
         if is_tmp:
             os.remove(infile)
 
+        if checksum_ok:
+            sys.exit(0)
+        else:
+            sys.exit(8)
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
@@ -204,10 +210,12 @@ def decode(message):
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
                                  flags=re.MULTILINE)
         except IndexError:
-            quit("Invalid packet to decode. Aborting.")
+            print("Invalid packet to decode. Aborting.")
+            sys.exit(2)
 
         if len(packets) == 0:
-            quit("Nothing to decode or nothing matched spec. Aborting.")
+            print("Nothing to decode or nothing matched spec. Aborting.")
+            sys.exit(2)
 
         packets_nice = []
         for p in packets:
@@ -241,7 +249,7 @@ def decode(message):
         payload = bz2.decompress(payload)
         checksum_ok = verify(payload, segments[0][checksum])
         payload = bytes(payload)
-        return payload
+        return payload, checksum_ok
 
 
 def verify(data, given_hash):
