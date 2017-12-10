@@ -50,10 +50,6 @@ stdin = sys.stdin
 compress = None
 
 
-# Change this version variable to change the --version output
-program_version = '0.0.1'
-
-
 def encode_data(data, chunksize, compresslevel, compresstype):
     """encode_data
 
@@ -211,7 +207,7 @@ def main():
         if check_for_file(args.input):
             with open(args.input, 'rb') as f:
                 packets = encode_file(f, args.chunksize, args.compresslevel,
-                                      args.compresstype , args.filename)
+                                      args.compresstype, args.filename)
                 with open(args.output, 'w') as of:
                     for p in packets:
                         of.write(p)
