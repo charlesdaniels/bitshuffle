@@ -27,7 +27,7 @@ do_test () {
 	TEMPFILE_DST="/tmp/$(uuidgen)"
 	make_random "$TEMPFILE_SRC"
 	TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
-	eval "$1"
+	eval "$1" > "$LOG_FILE" 2>&1 
 	TEMPFILE_DST_SHA="$(shasum "$TEMPFILE_DST" 2>&1 | cut -d ' ' -f 1)"
 	if [ "$TEMPFILE_DST_SHA" = "$TEMPFILE_SRC_SHA" ] ; then
 		echo "PASSED"
