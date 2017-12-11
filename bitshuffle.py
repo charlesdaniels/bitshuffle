@@ -173,9 +173,10 @@ def main():
 
     args = parser.parse_args()
 
+    # Checks if no parameters were passed
     if len(sys.argv[1:]) == 0:
-        parser.print_help()
-        exit(0)
+        parser.print_usage()
+        sys.exit(1)
 
     elif args.version:
         print("Version: bitshuffle v%s" % version)
