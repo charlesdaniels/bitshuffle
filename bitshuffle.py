@@ -152,6 +152,10 @@ def main():
     iochoice.add_argument("--decode", "-d", "-D", action="store_true",
                           help="Extract a BitShuffle data packet.")
 
+    # '-v' can be used on its own
+    iochoice.add_argument("--version", "-v", action="store_true",
+                          help="Displays the current version of bitshuffle")
+
     parser.add_argument("--chunksize", "-c", type=int, default=2048,
                         help="Chunk size in bytes")
 
@@ -168,6 +172,10 @@ def main():
                              "Currently supported: 'bz2', 'gzip'")
 
     args = parser.parse_args()
+
+    if args.version:
+        print("Version: bitshuffle v{0}".format(program_version))
+        exit(0)
 
     if args.filename is None:
         args.filename = os.path.basename(args.input)
