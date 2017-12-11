@@ -1,6 +1,10 @@
 #!/bin/sh
+
+OLDCWD=`pwd`
+WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
+
 # basics
-sudo apt-get install -y unzip wget
+sudo apt-get install -y unzip wget pip
 
 # only 2.0 runs non-graphical installer
 sudo dpkg --add-architecture i386
@@ -25,7 +29,14 @@ rm -f python35.zip python-3.5.0-embed-win32.zip
 
 # pip is not included in python install
 wget https://bootstrap.pypa.io/get-pip.py
-wine python.exe get-pip.py
+$WINE_PYTHON get-pip.py
 
 # https://pyinstaller.readthedocs.io/en/stable/requirements.html?highlight=windows
-wine python -m pip install pyinstaller
+$WINE_PYTHON -m pip install pyinstaller
+
+# now with regular python
+pip install pyinstaller
+
+cd $OLDCWD
+$WINE_PYTHON -m pyinstaller --distpath dist/windows bitshuffle.py
+python -m pyinstaller --distpath dist/linux bitshuffle.py
