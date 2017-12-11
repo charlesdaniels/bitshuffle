@@ -5,8 +5,7 @@ cache:
   directories:
     /home/travis/.wine
 install:
-- python install pip3
-- pip3 install pycodestyle
+  pip3 install pycodestyle
 script:
 - "./smoketest/do_test.sh"
 - pycodestyle --ignore E221,E203 ./bitshuffle.py
