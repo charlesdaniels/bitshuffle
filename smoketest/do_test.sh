@@ -68,6 +68,15 @@ all_tests () {
         $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
+    printf "GZIP test... "
+    do_test '$BITSHUFFLE --encode --compresstype "gzip" --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+
+    printf "BZIP test... "
+    do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        
 }
 
 echo "Running tests..."
