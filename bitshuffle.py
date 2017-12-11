@@ -133,53 +133,123 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype, filename):
 def main():
     parser = argparse.ArgumentParser(description="")
 
-    parser.add_argument("--input", "-i", default="/dev/stdin",
-                        help="Input file. Default is stdin.")
+    parser.add_argument("--input", "-i",
+                        help="Input file. Defaults to stdin.")
 
-    parser.add_argument("--output", "-o", default="/dev/stdout",
-                        help="Output file. Default is stdout.")
+    parser.add_argument("--output", "-o",
+                        help="Output file. Defaults to stdout.")
 
-    parser.add_argument("--filename", "-f", default=None,
+    parser.add_argument("--filename", "-f",
                         help="Set filename to use when encoding " +
                         "explicitly")
 
-    iochoice = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument("--encode", "-e", action="store_true",
+                        help="Generate a BitShuffle data packet " +
+                        "from the input file")
 
-    iochoice.add_argument("--encode", "-e", action="store_true",
-                          help="Generate a BitShuffle data packet from " +
-                          "the input file")
+    parser.add_argument("--decode", "-d", "-D", action="store_true",
+                        help="Extract a BitShuffle data packet.")
 
-    iochoice.add_argument("--decode", "-d", "-D", action="store_true",
-                          help="Extract a BitShuffle data packet.")
+    parser.add_argument("--version", "-v", action="store_true",
+                        help="Displays the current version of bitshuffle")
 
-    # '-v' can be used on its own
-    iochoice.add_argument("--version", "-v", action="store_true",
-                          help="Displays the current version of bitshuffle")
+    parser.add_argument("--chunksize", "-c", type=int,
+                        help="Chunk size in bytes. Defaults to 2048.")
 
-    parser.add_argument("--chunksize", "-c", type=int, default=2048,
-                        help="Chunk size in bytes")
-
-    parser.add_argument("--compresslevel", '-m', type=int, default=5,
+    parser.add_argument("--compresslevel", '-m', type=int,
                         help="Compression level when encoding. " +
-                        "1 is lowest, 9 is highest")
+                        "1 is lowest, 9 is highest. Defaults to 5.")
 
     parser.add_argument("--editor", "-E",
-                        help="Editor to use for pasting packets")
+                        help="Editor to use for pasting packets. " +
+                        "If not specified, defaults in this order:\n" +
+                        "\t$VISUAL, $EDITOR, mimeopen, nano, vi, " +
+                        "emacs, micro, notepad, notepad++")
 
-    parser.add_argument("--compresstype", '-t', default="bz2",
-                        help="Type of compression to use. Defaults to bz2. " +
-                             "Ignored if decoding packets. " +
+    parser.add_argument("--compresstype", '-t',
+                        help="Type of compression to use when encoding. "
+                             "Defaults to bz2. " +
                              "Currently supported: 'bz2', 'gzip'")
 
     args = parser.parse_args()
 
-    if args.version:
-        print("Version: bitshuffle v{0}".format(program_version))
+    defaults = {'input': '/dev/stdin', 'output': '/dev/stdout',
+                'chunksize': 2048, 'compresslevel': 5, 'compresstype': 'bz2'}
+
+    if len(sys.argv[1:]) == 0:
+        parser.print_help()
         exit(0)
 
-    if args.filename is None:
+    elif args.version:
+        print("Version: bitshuffle v%s" % version)
+        exit(0)
+
+    # Encode & Decode inference
+    if not args.encode and not args.decode:
+
+        if not args.compresstype:
+
+            if not args.compresslevel:
+
+                if not args.chunklevel:
+
+                    if not args.filename:
+
+                        # this is a submenu: could specify editor to compose
+                        # TODO: check editor when encoding as well as decoding
+
+                        if not args.editor:
+                            args.editor = get_editor()
+                            stderr.write("editor is %s\n" % editor)
+
+                            # don't understand the logic past here
+                            if not args.input:
+                                args.input = "/dev/stdin"
+
+                                # shouldn't this be reversed?
+                                if std.isatty():
+                                    args.decode = True
+
+                                else:
+                                    parser.print_help()
+                                    sys.exit(1)
+
+                            # why are we encoding if output is stdout?
+                            elif not args.output:
+                                args.output = '/dev/stdout'
+                                args.encode = True
+
+                            else:
+                                parser.print_help()
+                                sys.exit(1)
+
+                        else:  # editor specified, must be decoding
+                            args.decode = True
+
+                    else:  # filename specified, must be encoding
+                        args.encode = True
+
+                else:  # chunksize specified, must be encoding
+                    args.encode
+
+            else:  # compression specified, must be encoding
+                args.encode = True
+
+        else:  # compression specified, must be encoding
+            args.encode = True
+
+    # set up defaults
+    for arg in args.__dict__:
+        try:
+            if not args.__dict__[arg]:
+                args.__dict__[arg] = defaults[arg]
+        except KeyError:
+            pass
+
+    if not args.filename:
         args.filename = os.path.basename(args.input)
 
+    # Main
     if args.encode:
         if args.compresstype not in ['bz2', 'gzip']:
             parser.print_help()
@@ -202,27 +272,6 @@ def main():
         if stdin.isatty() and args.input is '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
-
-            if args.editor:
-                editor = args.editor
-            elif 'VISUAL' in os.environ:
-                editor = os.environ['VISUAL']
-            elif 'EDITOR' in os.environ:
-                editor = os.environ['EDITOR']
-            else:
-                for program in ['mimeopen', 'nano', 'vi', 'emacs',
-                                'micro', 'notepad', 'notepad++']:
-                    editor = which(program)
-                    if editor is not None:  # something worked
-                        break
-
-                if editor is None:
-                    print("Could not find a suitable editor." +
-                          "Please specify with '--editor'" +
-                          "or set the EDITOR variable in your shell.")
-                    sys.exit(1)
-
-            stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
@@ -298,6 +347,24 @@ def decode(message):
         checksum_ok = verify(payload, segments[0][checksum])
         payload = bytes(payload)
         return payload, checksum_ok
+
+
+def find_editor():
+    if 'VISUAL' in os.environ:
+        return os.environ['VISUAL']
+    elif 'EDITOR' in os.environ:
+        return os.environ['EDITOR']
+    else:
+        for program in ['mimeopen', 'nano', 'vi', 'emacs',
+                        'micro', 'notepad', 'notepad++']:
+            editor = which(program)
+            if editor:
+                return editor
+
+        print("Could not find a suitable editor." +
+              "Please specify with '--editor'" +
+              "or set the EDITOR variable in your shell.")
+        sys.exit(1)
 
 
 def verify(data, given_hash):
