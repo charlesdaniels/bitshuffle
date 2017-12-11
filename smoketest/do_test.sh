@@ -53,7 +53,6 @@ all_tests () {
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
-
     printf "Basic encode/decode test (large chunk size)... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
@@ -68,7 +67,6 @@ all_tests () {
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
-
 
     printf "GZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "gzip" --input "$TEMPFILE_SRC" | \
