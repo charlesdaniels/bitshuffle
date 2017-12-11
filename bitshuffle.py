@@ -174,11 +174,11 @@ def main():
     # Checks if no parameters were passed so the help can be printed
     if len(sys.argv[1:]) == 0:
         parser.print_help()
-        exit(0)
+        sys.exit(0)
 
     if args.version:
         print("Version: bitshuffle v{0}".format(program_version))
-        exit(0)
+        sys.exit(0)
 
     if args.filename is None:
         args.filename = os.path.basename(args.input)
