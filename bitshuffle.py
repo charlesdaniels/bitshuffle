@@ -251,21 +251,25 @@ def main():
 
     # Main
     if args.encode:
+
         if args.compresstype not in ['bz2', 'gzip']:
             parser.print_help()
             sys.exit(1)
 
-        with open(args.input, 'rb') as f:
-            packets = encode_file(f, args.chunksize, args.compresslevel,
-                                  args.compresstype, args.filename)
-            with open(args.output, 'w') as of:
-                for p in packets:
-                    of.write(p)
-                    of.write("\n\n")
+        if check_for_file(args.input):
+            with open(args.input, 'rb') as f:
+                packets = encode_file(f, args.chunksize, args.compresslevel,
+                                      args.compresstype, args.filename)
+                with open(args.output, 'w') as of:
+                    for p in packets:
+                        of.write(p)
+                        of.write("\n\n")
 
-                of.flush()
-
+                    of.flush()
+        else:
+            quit('Error: Input file not found')
     elif args.decode:
+
         infile = args.input
         # set to True for infile to be deleted after decoding
         is_tmp = False
@@ -379,6 +383,14 @@ def verify(data, given_hash):
                      "may want to investigate.\n")
         return False
     return True
+
+
+def check_for_file(filename):
+    try:
+        open(filename)
+        return True
+    except FileNotFoundError:
+        return False
 
 
 if __name__ == "__main__":
