@@ -173,9 +173,6 @@ def main():
 
     args = parser.parse_args()
 
-    defaults = {'input': '/dev/stdin', 'output': '/dev/stdout',
-                'chunksize': 2048, 'compresslevel': 5, 'compresstype': 'bz2'}
-
     if len(sys.argv[1:]) == 0:
         parser.print_help()
         exit(0)
@@ -185,69 +182,10 @@ def main():
         exit(0)
 
     # Encode & Decode inference
-    if not args.encode and not args.decode:
+    args = infer_mode(args)
 
-        if not args.compresstype:
-
-            if not args.compresslevel:
-
-                if not args.chunklevel:
-
-                    if not args.filename:
-
-                        # this is a submenu: could specify editor to compose
-                        # TODO: check editor when encoding as well as decoding
-
-                        if not args.editor:
-                            args.editor = get_editor()
-                            stderr.write("editor is %s\n" % editor)
-
-                            # don't understand the logic past here
-                            if not args.input:
-                                args.input = "/dev/stdin"
-
-                                # shouldn't this be reversed?
-                                if std.isatty():
-                                    args.decode = True
-
-                                else:
-                                    parser.print_help()
-                                    sys.exit(1)
-
-                            # why are we encoding if output is stdout?
-                            elif not args.output:
-                                args.output = '/dev/stdout'
-                                args.encode = True
-
-                            else:
-                                parser.print_help()
-                                sys.exit(1)
-
-                        else:  # editor specified, must be decoding
-                            args.decode = True
-
-                    else:  # filename specified, must be encoding
-                        args.encode = True
-
-                else:  # chunksize specified, must be encoding
-                    args.encode
-
-            else:  # compression specified, must be encoding
-                args.encode = True
-
-        else:  # compression specified, must be encoding
-            args.encode = True
-
-    # set up defaults
-    for arg in args.__dict__:
-        try:
-            if not args.__dict__[arg]:
-                args.__dict__[arg] = defaults[arg]
-        except KeyError:
-            pass
-
-    if not args.filename:
-        args.filename = os.path.basename(args.input)
+    # Set default values
+    args = set_defaults(args)
 
     # Main
     if args.encode:
@@ -268,6 +206,7 @@ def main():
                     of.flush()
         else:
             quit('Error: Input file not found')
+
     elif args.decode:
 
         infile = args.input
@@ -351,6 +290,48 @@ def decode(message):
         checksum_ok = verify(payload, segments[0][checksum])
         payload = bytes(payload)
         return payload, checksum_ok
+
+
+def infer_mode(args):
+    if args.encode or args.decode:
+        return args
+
+    elif any((args.compresstype, args.compresslevel,
+              args.chunklevel, args.filename)):
+        args.encode = True
+
+    # this is a submenu: could specify editor to compose
+    # TODO: check editor when encoding as well as decoding
+
+    elif args.editor:
+        args.decode = True
+
+    # don't understand the logic past here
+    elif stdin.isatty() and not args.input:
+        args.decode = True
+
+    elif not args.output:
+        args.encode = True
+
+    else:
+        parser.print_help()
+        quit(1)
+
+
+def set_defaults(args):
+
+    defaults = {'input': '/dev/stdin', 'output': '/dev/stdout',
+                'editor': find_editor(), 'chunksize': 2048,
+                'compresslevel': 5, 'compresstype': 'bz2'}
+
+    for arg in args.__dict__:
+        if arg in defaults and not args.__dict__[arg]:
+            args.__dict__[arg] = defaults[arg]
+
+    if not args.filename:
+        args.filename = os.path.basename(args.input)
+
+    return args
 
 
 def find_editor():
