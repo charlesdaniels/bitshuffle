@@ -85,6 +85,17 @@ echo "Running tests..."
 
 TESTS_FAILED=0
 
+printf "\nChecking for valid .travis.yml config... "
+LOG_FILE="/tmp/$(uuidgen)"
+if travis lint .travis.yml 1>$LOG_FILE 2>&1; then
+    echo "PASSED"
+else
+    echo "FAILED"
+    while read -r ln; do
+        printf "\t$ln\n"
+    done < "$LOG_FILE"
+fi
+
 printf "\nRunning Python2 tests...\n"
 BITSHUFFLE="$BITSHUFFLE2"
 all_tests
