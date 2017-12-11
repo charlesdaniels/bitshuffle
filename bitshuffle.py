@@ -132,7 +132,7 @@ def main():
     parser.add_argument("--compresslevel", '-m', type=int, default=5,
                         help="bz2 compression level when encoding")
 
-    parser.add_argument("--editor", "-E", default="",
+    parser.add_argument("--editor", "-E",
                         help="Editor to use for pasting packets")
 
     args = parser.parse_args()
@@ -165,15 +165,16 @@ def main():
             elif 'EDITOR' in os.environ:
                 editor = os.environ['EDITOR']
             else:
-                for program in ['mimeopen', 'nano', 'vi', 'emacs', 'micro']:
+                for program in ['mimeopen', 'nano', 'vi', 'emacs',
+                                'micro', 'notepad', 'notepad++']:
                     editor = which(program)
-                    if editor != '':  # something worked
+                    if editor is not None:  # something worked
                         break
 
-            if editor == '':
-                quit("Could not find a suitable editor." +
-                     "Please specify with '--editor'" +
-                     "or set the EDITOR variable in your shell.")
+                if editor is None:
+                    quit("Could not find a suitable editor." +
+                         "Please specify with '--editor'" +
+                         "or set the EDITOR variable in your shell.")
             stderr.write("editor is %s\n" % editor)
 
             tmpfile = tempfile.mkstemp()[1]
