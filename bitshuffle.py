@@ -212,7 +212,7 @@ def main():
         infile = args.input
         # set to True for infile to be deleted after decoding
         is_tmp = False
-        if stdin.isatty() and args.input is '/dev/stdin':
+        if stdin.isatty() and args.input == '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
 
@@ -221,7 +221,7 @@ def main():
                 tf.write("Paste your BitShuffle packets in this file. You " +
                          "do not need to delete this message.\n\n")
                 tf.flush()
-            subprocess.call([editor, tmpfile])
+            subprocess.call([args.editor, tmpfile])
             infile = tmpfile
 
         with open(infile, 'r') as f:
@@ -297,7 +297,7 @@ def infer_mode(args):
         return args
 
     elif any((args.compresstype, args.compresslevel,
-              args.chunklevel, args.filename)):
+              args.chunksize, args.filename)):
         args.encode = True
 
     # this is a submenu: could specify editor to compose
@@ -316,6 +316,8 @@ def infer_mode(args):
     else:
         parser.print_help()
         quit(1)
+
+    return args
 
 
 def set_defaults(args):
