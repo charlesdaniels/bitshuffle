@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# exit on first failure
+# be verbose
+set -ev
+
 OLDCWD=`pwd`
 WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
 
@@ -37,6 +41,11 @@ $WINE_PYTHON -m pip install pyinstaller
 # now with regular python
 pip install pyinstaller
 
+# actually make the files
 cd $OLDCWD
 $WINE_PYTHON -m pyinstaller --distpath dist/windows bitshuffle.py
 python -m pyinstaller --distpath dist/linux bitshuffle.py
+
+# make archive files
+tar -vczf dist/linux/bitshuffle.tar.gz dist/linux/bitshuffle
+zip -rA9 dist/windows/bitshuffle.zip dist/windows/bitshuffle
