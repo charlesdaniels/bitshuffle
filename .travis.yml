@@ -1,4 +1,6 @@
 language: python
+# Sudo is required so that steup.py can be tested (TODO: investigate using
+# a virtualenv instead?)
 sudo: required
 python: 3.5
 os: linux
