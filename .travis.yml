@@ -7,7 +7,7 @@ cache:
 install:
   pip3 install pycodestyle
 script:
-- "./scripts/do_test.sh"
+- "./scripts/test_end2end.sh"
 - pycodestyle --ignore E221,E203 ./bitshuffle/bitshuffle.py
 notifications:
   email:
