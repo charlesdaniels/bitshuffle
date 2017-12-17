@@ -10,7 +10,7 @@
 set -e
 set -u
 
-PARENT_DIR="$(dirname "$(realpath "$0")")"
+PARENT_DIR="$(dirname "$(readlink -f "$0")")"
 PROJECT_TLD="$PARENT_DIR/.."
 echo "project root seems to be: $PROJECT_TLD"
 
