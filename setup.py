@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from bitshuffle import version
+from bitshuffle.bitshuffle import version
 from setuptools import setup
 from setuptools import find_packages
 
@@ -41,7 +41,8 @@ setup(name="bitshuffle",
       license='BSD',
       classifiers=classifiers,
       keywords='checksum hash internet transmit file',
+      package_dir = {'bitshuffle': 'bitshuffle'},
       packages=find_packages(exclude=['smoketest']),
       platforms=['POSIX'],
-      entry_points={'console_scripts': ['bitshuffle=bitshuffle:main']}
+      entry_points={'console_scripts': ['bitshuffle=bitshuffle.bitshuffle:main']}
       )

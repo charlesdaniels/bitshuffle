@@ -177,7 +177,7 @@ def main():
         sys.exit(0)
 
     if args.version:
-        print("Version: bitshuffle v{0}".format(program_version))
+        print("Version: bitshuffle v{0}".format(version))
         sys.exit(0)
 
     if args.filename is None:
