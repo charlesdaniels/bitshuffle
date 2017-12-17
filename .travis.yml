@@ -8,6 +8,7 @@ install:
   pip3 install pycodestyle
 script:
 - "./scripts/test_end2end.sh"
+- "./scripts/test_setup_py.sh"
 - pycodestyle --ignore E221,E203 ./bitshuffle/bitshuffle.py
 notifications:
   email:

@@ -2,7 +2,7 @@
 
 # .SHELLDOC
 
-# Basic smoketests for BitShuffle. Exit code is # of failed tests.
+# Basic end-to-end tests for BitShuffle. Exit code is # of failed tests.
 
 # .ENDOC
 
