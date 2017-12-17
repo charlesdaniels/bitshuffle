@@ -7,15 +7,15 @@ cache:
 install:
   pip3 install pycodestyle
 script:
-- "./smoketest/do_test.sh"
-- pycodestyle --ignore E221,E203 ./bitshuffle.py
+- "./scripts/do_test.sh"
+- pycodestyle --ignore E221,E203 ./bitshuffle/bitshuffle.py
 notifications:
   email:
     on_success: never
     on_failure: always
-  
+
 before_deploy:
- ./travis.sh
+ ./scripts/travis.sh
 
 deploy:
   on:
@@ -29,5 +29,5 @@ deploy:
 # - provider: pypi
 #     on:
 #       tags: true
-# run `travis encrypt --add deploy.password` to avoid making password public 
+# run `travis encrypt --add deploy.password` to avoid making password public
 

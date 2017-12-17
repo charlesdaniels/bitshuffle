@@ -7,7 +7,7 @@
 # .ENDOC
 
 PARENT_DIR="$(dirname "$0")"
-BITSHUFFLE="$PARENT_DIR/../bitshuffle.py"
+BITSHUFFLE="$PARENT_DIR/../bitshuffle/bitshuffle.py"
 BITSHUFFLE2="python2 $BITSHUFFLE"
 BITSHUFFLE3="python3 $BITSHUFFLE"
 if [ ! -x "$BITSHUFFLE" ] ; then
@@ -27,7 +27,7 @@ do_test () {
 	TEMPFILE_DST="/tmp/$(uuidgen)"
 	make_random "$TEMPFILE_SRC"
 	TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
-	eval "$1" > "$LOG_FILE" 2>&1 
+	eval "$1" > "$LOG_FILE" 2>&1
 	TEMPFILE_DST_SHA="$(shasum "$TEMPFILE_DST" 2>&1 | cut -d ' ' -f 1)"
 	if [ "$TEMPFILE_DST_SHA" = "$TEMPFILE_SRC_SHA" ] ; then
 		echo "PASSED"
@@ -78,7 +78,7 @@ all_tests () {
     printf "BZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
-        
+
 }
 
 echo "Running tests..."
