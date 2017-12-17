@@ -12,6 +12,7 @@ set -u
 
 PARENT_DIR="$(dirname "$0")"
 PROJECT_TLD="$PARENT_DIR/.."
+echo "project root seems to be: $PROJECT_TLD"
 
 cd "$PROJECT_TLD"
 if [ ! -e "./bitshuffle" ] ; then
@@ -44,13 +45,16 @@ do_test () {
 
 	echo "Testing BitShuffle setup.py with '$PYTHON_BIN'"
 
+        cd "$PROJECT_TLD"
 	if [ ! -e "./bitshuffle" ] ; then
 		echo "PANIC: failed to locate bitshuffle module directory"
+		echo "cwd is: '$(pwd)'"
 		exit 999
 	fi
 
 	if [ ! -e "./setup.py" ] ; then
 		echo "PANIC: failed to locate setup.py"
+		echo "cwd is: '$(pwd)'"
 		exit 999
 	fi
 
