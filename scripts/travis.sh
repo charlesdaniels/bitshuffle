@@ -15,7 +15,7 @@ sudo dpkg --add-architecture i386
 wget -nc https://dl.winehq.org/wine-builds/Release.key
 sudo apt-key add Release.key
 rm Release.key
-sudo sh -c 'echo "deb https://dl.winehq.org/wine-builds/debian/ stretch main" >> /etc/apt/sources.list'
+sudo sh -c 'echo "deb https://dl.winehq.org/wine-builds/ubuntu/ trusty main" >> /etc/apt/sources.list'
 sudo apt-get update
 sudo apt install --install-recommends winehq-stable
 
