@@ -21,19 +21,13 @@ find "$PROJECT_ROOT" -print | while read -r line ; do
 		pycodestyle "$line"
 		RETCODE=$?
 		echo ""
-
-		TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
-
-		# this is a totally disgusting hack to exfiltrate data from the
-		# subshell that gets spawned by this while loop
-		echo "$TOTAL" > "$TEMPFILE"
+		# while loops are implemented as a subshell
+		exit "$(echo "$RETCODE + $TOTAL" | bc)"
 	fi
 done
 
-TOTAL="$(cat "$TEMPFILE")"
+TOTAL="$?"
 echo "$TOTAL total defects across all files"
-
-rm "$TEMPFILE"
 exit $TOTAL
 
 
