@@ -6,7 +6,9 @@
 
 # .ENDOC
 
-PARENT_DIR="$(dirname "$0")"
+. "$(dirname $0)/realpath.sh"
+PARENT_DIR="$(realpath_sh $(dirname "$0"))"
+PROJECT_ROOT="$PARENT_DIR/.."
 BITSHUFFLE="$PARENT_DIR/../bitshuffle/bitshuffle.py"
 BITSHUFFLE2="python2 $BITSHUFFLE"
 BITSHUFFLE3="python3 $BITSHUFFLE"
@@ -85,9 +87,10 @@ echo "Running tests..."
 
 TESTS_FAILED=0
 
+# in the future, this should maybe be it's own file?
 printf "\nChecking for valid .travis.yml config... "
 LOG_FILE="/tmp/$(uuidgen)"
-if travis lint .travis.yml 1>$LOG_FILE 2>&1; then
+if travis lint "$PROJECT_ROOT/.travis.yml" 1>$LOG_FILE 2>&1; then
     echo "PASSED"
 else
     echo "FAILED"

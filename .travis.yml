@@ -16,7 +16,7 @@ script:
 - "./scripts/test_end2end.sh"
 - "./scripts/test_setup_py.sh"
 - "./scripts/test_argument_options.sh"
-- "pycodestyle --filename='*.py,bitshuffle/bitshuffle.py'"
+- "./scripts/test_pycodestyle.sh"
 
 notifications:
   email:

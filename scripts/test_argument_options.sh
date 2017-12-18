@@ -7,7 +7,8 @@
 
 # .ENDOC
 
-TEST_DIR="`readlink -e $(dirname "$0")`"
+. "$(dirname $0)/realpath.sh"
+TEST_DIR="$(realpath_sh $(dirname "$0"))"
 BITSHUFFLE="$TEST_DIR/../bitshuffle/bitshuffle.py"
 TESTS_FAILED=0
 
