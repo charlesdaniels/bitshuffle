@@ -102,11 +102,14 @@ Dependancies
 ------------
 
 To install/run BitShuffle:
+
 * POSIX-ish operating system (Windows should work, but is not actively tested
 at this time).
+
 * Either Python 2, or Python 3.
 
 To run BitShuffle's automated tests locally:
+
 * POSIX ``sh`` compliant shell interpreter
 * ``uuidgen``
 * ``travis`` (hint: ``gem install travis``)
