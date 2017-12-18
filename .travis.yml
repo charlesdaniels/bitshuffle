@@ -5,7 +5,8 @@ sudo: required
 python: 3.5
 os: linux
 install:
-  pip3 install pycodestyle
+  - pip3 install pycodestyle
+  - gem install travis --no-rdoc --no-ri
 
 cache:
   directories:
