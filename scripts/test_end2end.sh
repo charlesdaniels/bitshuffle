@@ -9,7 +9,7 @@
 . "$(dirname $0)/realpath.sh"
 PARENT_DIR="$(realpath_sh $(dirname "$0"))"
 PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE="$PARENT_DIR/../bitshuffle/bitshuffle.py"
+BITSHUFFLE="$PROJECT_ROOT/bitshuffle/bitshuffle.py"
 BITSHUFFLE2="python2 $BITSHUFFLE"
 BITSHUFFLE3="python3 $BITSHUFFLE"
 if [ ! -x "$BITSHUFFLE" ] ; then
@@ -27,7 +27,6 @@ do_test () {
 	LOG_FILE="/tmp/$(uuidgen)"
 	TEMPFILE_SRC="/tmp/$(uuidgen)"
 	TEMPFILE_DST="/tmp/$(uuidgen)"
-	TEMPFILE_SWP="/tmp/$(uuidgen)"
 	make_random "$TEMPFILE_SRC"
 	TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
 	eval "$1" > "$LOG_FILE" 2>&1
@@ -48,7 +47,6 @@ do_test () {
 	rm -f "$LOG_FILE"
 	rm -f "$TEMPFILE_SRC"
 	rm -f "$TEMPFILE_DST"
-	rm -f "$TEMPFILE_SWP"
 }
 
 all_tests () {
@@ -95,19 +93,6 @@ all_tests () {
 echo "Running tests..."
 
 TESTS_FAILED=0
-
-# in the future, this should maybe be it's own file?
-printf "\nChecking for valid .travis.yml config... "
-LOG_FILE="/tmp/$(uuidgen)"
-if travis lint "$PROJECT_ROOT/.travis.yml" 1>$LOG_FILE 2>&1; then
-    echo "PASSED"
-else
-    echo "FAILED"
-    TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
-    while read -r ln; do
-        printf "\t$ln\n"
-    done < "$LOG_FILE"
-fi
 
 printf "\nRunning Python2 tests...\n"
 BITSHUFFLE="$BITSHUFFLE2"
