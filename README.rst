@@ -53,18 +53,47 @@ Example Use-Cases
 FAQ
 ---
 
-Why Not Use Dropbox/Google Drive/MediaFire/Etc
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Why Not Use Dropbox/Google Drive/MediaFire/Etc?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services are inconvenient to use for very small or transient files; i.e.
 "let me show you this cool shell script I wrote", or "here look at this 10 line
 long log file".
 
-Why Not Use PasteBin/HasteBin/Sprunge/Etc
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Why Not Use PasteBin/HasteBin/Sprunge/Etc?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services are designed specifically for transferring plain text data, and
 often mangle binary data. They usually have size limitation as well.
+
+Is This Really Useful?
+~~~~~~~~~~~~~~~~~~~~~~
+
+The authors of BitShuffle find it useful. Maybe you will too. Maybe not.
+
+Why so Much CI / Testing?
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The amount of automated tests may seem high for a project as small as
+BitShuffle is. However, BitShuffle is intended to be a tool used on a daily
+basis (as it is by it's authors), inside of pipelines, and possibly inside of
+other automation. It is critical thus that it not break or behave in strange or
+unusual ways for the same reason ``ls`` needs to not break on weird edge cases
+- it's used too frequently.
+
+Can I Embed BitShuffle in my Project?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Yes, but please wait until we have a stable release. The data packet format may
+change without warning until there is at least one stable release.
+
+Does BitShuffle Have a Stable API?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Not at this time, but it will in the future as the project matures a bit. Until
+then use BitShuffle as a Python module at your own risk.
 
 Installation
 ============
