@@ -350,6 +350,9 @@ def infer_mode(args):
     elif not args.output:
         args.encode = True
 
+    elif args.output and not stdin.isatty():
+        args.decode = True
+
     else:
         parser.print_help()
         quit(1)
