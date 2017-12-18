@@ -215,26 +215,13 @@ def main():
         if stdin.isatty() and args.input == '/dev/stdin':
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
-            if args.editor:
-                editor = args.editor
-            elif 'VISUAL' in os.environ:
-                editor = os.environ['VISUAL']
-            elif 'EDITOR' in os.environ:
-                editor = os.environ['EDITOR']
-            else:
-                for program in ['mimeopen', 'nano', 'vi', 'emacs',
-                                'micro', 'notepad', 'notepad++']:
-                    editor = which(program)
-                    if editor is not None:  # something worked
-                        break
+            if not args.editor:
+                args.editor = find_editor()
+            if not check_for_file(args.editor):
+                print("Editor %s not found" % args.editor)
+                sys.exit(4)
 
-                if editor is None:
-                    print("Could not find a suitable editor." +
-                          "Please specify with '--editor'" +
-                          "or set the EDITOR variable in your shell.")
-                    sys.exit(1)
-
-            stderr.write("editor is %s\n" % editor)
+            stderr.write("editor is %s\n" % args.editor)
 
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
@@ -390,7 +377,7 @@ def verify(data, given_hash):
 
 def check_for_file(filename):
     try:
-        open(filename)
+        open(filename).close()
         return True
     except FileNotFoundError:
         return False
