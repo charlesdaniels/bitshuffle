@@ -27,6 +27,7 @@ do_test () {
 	LOG_FILE="/tmp/$(uuidgen)"
 	TEMPFILE_SRC="/tmp/$(uuidgen)"
 	TEMPFILE_DST="/tmp/$(uuidgen)"
+	TEMPFILE_SWP="/tmp/$(uuidgen)"
 	make_random "$TEMPFILE_SRC"
 	TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
 	eval "$1" > "$LOG_FILE" 2>&1
@@ -47,6 +48,7 @@ do_test () {
 	rm -f "$LOG_FILE"
 	rm -f "$TEMPFILE_SRC"
 	rm -f "$TEMPFILE_DST"
+	rm -f "$TEMPFILE_SWP"
 }
 
 all_tests () {
@@ -71,15 +73,22 @@ all_tests () {
         $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
-
     printf "GZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "gzip" --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
-
     printf "BZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+    printf "Test infer encode from --input... "
+    do_test '$BITSHUFFLE --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+
+    printf "Test infer decode from --output and non-tty stdin... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --output "$TEMPFILE_DST"'
+
 
 }
 
