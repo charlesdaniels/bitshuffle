@@ -37,8 +37,10 @@
 #
 #  ---------
 #
-#  This software used and modified from it's origonal version on 2016-12-31 by
+#  This software used and modified from its original version on 2016-12-31 by
 #  Charles Daniels.
+#
+#  Modified 2017-12-18 by Joshua Nelson
 #
 ########10########20########30########40########50########60########70########80
 

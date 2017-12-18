@@ -23,7 +23,7 @@ echo ""
 echo "- - - - -"
 echo "$TOTAL_FAILED total test failures"
 if [ $TOTAL_FAILED -gt 0 ] ; then
-	echo "One or more poroblems found, please fix these before committing."
+	echo "One or more problems found, please fix these before committing."
 else
 	echo "Everything looks ok, proceed with commit."
 fi
