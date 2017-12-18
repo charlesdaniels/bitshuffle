@@ -8,7 +8,7 @@ OLDCWD=`pwd`
 WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
 
 # basics
-sudo apt-get install -y unzip wget pip
+sudo apt-get install -y unzip wget
 
 # only 2.0 runs non-graphical installer
 sudo dpkg --add-architecture i386
