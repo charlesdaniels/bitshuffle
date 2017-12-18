@@ -13,15 +13,42 @@ Build Status
 Introduction
 ============
 
-BitShuffle is a protocol for transmitting arbitrary bitstreams over
-bitstream-hostile transmission mediums. In particular, it is designed for use
-with applications such as instant messaging program or e-mail. The use case is
-for transmitting arbitrary files through services that restrict files that can
-be sent. For example:
+What is it?
+-----------
 
-* Email systems that restrict what types of files can be attached to emails.
-* Instant messaging services that allow only certain types of files to be sent,
-  or none at all.
+BitShuffle is a program for encoding and decoding arbitrary binary data into
+printable ASCII characters for transfer over arbitrary media. In many respects,
+it can fill the same purpose as ``base64`` or ``uudecode`` / ``uuencode``,
+however it is more sophisticated than these tools. Some key features that
+BitShuffle offers include:
+
+* Automatic chunking of data into arbitrary sizes.
+
+* Automatic checksumming of data
+
+* Automatic compression of data (bzip and gzip are both support, see #2)
+
+* Support for both Python 2 and 3
+
+Example Use-Cases
+-----------------
+
+* The use case which spawned the project in the first place; copying small
+  files over an existing interactive ``ssh`` session without needing to
+  re-authenticate when using ``scp``.
+
+* Transferring arbitrary files over chat programs which either don't allow
+  attachments, or which restrict what file types are allowed. For example
+  sending a small script to a friend over GroupMe.
+
+* Embedding arbitrary binary data in program logs (as an example, one of
+  BitShuffle's authors once used a spiritual precursor to BitShuffle to pickle
+  and embed live Python objects into a program's debug log for later
+  interactive debugging).
+
+* Sending e-mail attachments across e-mail servers that don't allow certain
+  file types/extensions (email attachments are really just base64 encoded
+  data anyway, but BitShuffle would avoid inspection by most mail services).
 
 FAQ
 ---
@@ -30,21 +57,60 @@ Why Not Use Dropbox/Google Drive/MediaFire/Etc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services are inconvenient to use for very small or transient files; i.e.
-"let me show you this cool shell script I wrote".
+"let me show you this cool shell script I wrote", or "here look at this 10 line
+long log file".
 
 Why Not Use PasteBin/HasteBin/Sprunge/Etc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services are designed specifically for transferring plain text data, and
-often mangle binary data. They usually have size limitations, and do not
-support multiple files.
+often mangle binary data. They usually have size limitation as well.
 
-CONTRIBUTING
----
+Installation
+============
 
-The only thing needed to run the executable is python (2 or 3). However,
-the tests require `bc`, `uuidgen`, and `shasum`. On debian-based systems, these
-can be installed with `sudo apt-get install bc uuid-runtime coreutils`.
+Dependancies
+------------
+
+To install/run BitShuffle:
+* POSIX-ish operating system (Windows should work, but is not actively tested
+  at this time).
+* Either Python 2, or Python 3.
+
+To run BitShuffle's automated tests locally:
+* POSIX ``sh`` compliant shell interpreter
+* ``uuidgen``
+* ``travis`` (hint: ``gem install travis``)
+* ``bc``
+* ``/tmp`` must exist and be write-able
+
+Installing with ``setup.py``
+----------------------------
+
+Simply run ``python ./setup.py install``. 
+
+Installing Manually
+-------------------
+
+If you are only going to be using BitShuffle as a script, not as a python
+module, you can also just drop ``bitshuffle/bitshuffle.py`` into ``$PATH`` (I
+suggest symlinking to ``~/bin/bitshuffle``).
+
+Installing a Binary Release
+---------------------------
+
+This is not possible yet, but in the future, there will be static builds of
+BitShuffle that can be run standalone. See also #11.
+
+Contributing
+============
+
+Contributions are welcome! Simply open a GitHub pull request. All contributions
+need to pass the automated TravisCI checks.
+
+If you would like to contribute by sending patches over e-mail, that is fine
+to, just get in touch with @charlesdaniels.
+
 
 BitShuffel Data Packet Specification
 ====================================
@@ -87,8 +153,8 @@ Segments marked as *encoded* indicate their contents is arbitrary data which
 has been compressed with the specified compression type, and encoded with the
 specified encoding format.
 
-As an example, the following BitShuffle packets encode a tarball of the
-BitShuffle source code and this README::
+As an example, the following BitShuffle packets encode a tarball of (an old
+version of) the BitShuffle source code and this README::
 
         ((<<This is a BitShuffle encoded file, download BitShuffle from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|1|bitshuffle.tar|874c105c72b670fc3b659fe1808a09eae31c7417|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>>))
         ((<<This is a BitShuffle encoded file, download BitShuffle from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|1|1|bitshuffle.tar|874c105c72b670fc3b659fe1808a09eae31c7417|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>>))
