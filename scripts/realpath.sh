@@ -1,3 +1,4 @@
+#!/bin/sh
 ########10########20########30## DOCUMENTATION #50########60########70########80
 #
 #  OVERVIEW
@@ -50,10 +51,6 @@ realpath_sh() {
 }
 
 resolve_symlinks() {
-    _resolve_symlinks "$1"
-}
-
-_resolve_symlinks() {
     _assert_no_path_cycles "$@" || return
 
     local dir_context path
@@ -110,7 +107,7 @@ _canonicalize_file_path() {
     local dir file
     dir=$(dirname -- "$1")
     file=$(basename -- "$1")
-    (cd "$dir" 2>/dev/null && printf '%s/%s\n' "$(pwd -P)" "$file")
+    printf '%s/%s\n' $(_canonicalize_dir_path "$dir") "$file"
 }
 
 # Optionally, you may also want to include:
@@ -118,19 +115,11 @@ _canonicalize_file_path() {
 ### readlink emulation ###
 
 readlink() {
-    if _has_command readlink; then
-        _system_readlink "$@"
+    if hash readlink 2>/dev/null; then
+        command readlink "$@"
     else
         _emulated_readlink "$@"
     fi
-}
-
-_has_command() {
-    hash -- "$1" 2>/dev/null
-}
-
-_system_readlink() {
-    command readlink "$@"
 }
 
 _emulated_readlink() {
