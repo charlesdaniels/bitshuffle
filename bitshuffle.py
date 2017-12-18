@@ -170,7 +170,6 @@ def main():
                         help="Type of compression to use when encoding. "
                              "Defaults to bz2. " +
                              "Currently supported: 'bz2', 'gzip'")
-
     args = parser.parse_args()
 
     # Checks if no parameters were passed
