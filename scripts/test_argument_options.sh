@@ -54,20 +54,21 @@ expect_usage_error -h
 printf "When given bad compresstype, prints help... "
 expect_usage_error -t gmander
 
-printf "When given bad editor, prints editor not found... "
-LOG_FILE="/tmp/`uuidgen`"
-$BITSHUFFLE --editor /nonexistent > "$LOG_FILE" 2>&1
-if [ "`cat $LOG_FILE`" = "Editor /nonexistent not found" ]; then
-        echo "PASSED"
-else
-        printf "FAILED\n\n"
+# Can't be tested non-interactively
+#printf "When given bad editor, prints editor not found... "
+#LOG_FILE="/tmp/`uuidgen`"
+#$BITSHUFFLE --decode --editor /nonexistent > "$LOG_FILE" 2>&1
+#if [ "`cat $LOG_FILE`" = "Editor /nonexistent not found" ]; then
+#        echo "PASSED"
+#else
+#        printf "FAILED\n\n"
 
-        printf "'Editor /nonexistent not found' does not match logfile\n\n"
+#        printf "'Editor /nonexistent not found' does not match logfile\n\n"
 
-        print_log_file $LOG_FILE
-        TESTS_FAILED="`echo $TESTS_FAILED + 1 | bc`"
-        rm -f $LOG_FILE
-fi
+#        print_log_file $LOG_FILE
+#        TESTS_FAILED="`echo $TESTS_FAILED + 1 | bc`"
+#        rm -f $LOG_FILE
+#fi
 
 LOG_FILE="/tmp/`uuidgen`"
 printf "When given bad input, prints file not found... "

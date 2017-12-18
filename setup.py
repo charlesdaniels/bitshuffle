@@ -41,8 +41,9 @@ setup(name="bitshuffle",
       license='BSD',
       classifiers=classifiers,
       keywords='checksum hash internet transmit file',
-      package_dir = {'bitshuffle': 'bitshuffle'},
       packages=find_packages(exclude=['smoketest']),
-      platforms=['POSIX'],
-      entry_points={'console_scripts': ['bitshuffle=bitshuffle.bitshuffle:main']}
+      entry_points={'console_scripts':
+                    ['bitshuffle=bitshuffle.bitshuffle:main']},
+      package_dir={'bitshuffle': 'bitshuffle'},
+      platforms=['POSIX']
       )

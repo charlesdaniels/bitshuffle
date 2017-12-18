@@ -91,6 +91,7 @@ if travis lint .travis.yml 1>$LOG_FILE 2>&1; then
     echo "PASSED"
 else
     echo "FAILED"
+    TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
     while read -r ln; do
         printf "\t$ln\n"
     done < "$LOG_FILE"
