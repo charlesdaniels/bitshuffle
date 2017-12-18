@@ -18,7 +18,6 @@ import re
 import string
 import subprocess
 import tempfile
-import select
 
 try:
     from shutil import which
