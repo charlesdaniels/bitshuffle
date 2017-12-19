@@ -6,6 +6,9 @@
 # with the exception of those that would require root access or modify the
 # filesystem of the host machine. This script should be run before committing.
 #
+# This script only runs the python version given by `which python`, and so
+# cannot test both python2 and python3.
+#
 # .ENDOC
 
 . "$(dirname $0)/realpath.sh"
