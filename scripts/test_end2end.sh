@@ -9,9 +9,10 @@
 . "$(dirname $0)/realpath.sh"
 PARENT_DIR="$(realpath_sh $(dirname "$0"))"
 PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE="python $PROJECT_ROOT/bitshuffle/bitshuffle.py"
-if [ ! -x "$BITSHUFFLE" ] ; then
-	echo "FATAL: '$BITSHUFFLE' does not exist"
+BITSHUFFLE_FILE="$PROJECT_ROOT/bitshuffle/bitshuffle.py"
+BITSHUFFLE="python $BITSHUFFLE_FILE"
+if [ ! -f "$BITSHUFFLE_FILE" ] ; then
+	echo "FATAL: '$BITSHUFFLE_FILE' does not exist"
 	exit 9999
 fi
 
