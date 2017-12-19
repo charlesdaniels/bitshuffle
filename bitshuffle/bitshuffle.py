@@ -56,8 +56,8 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     sized chunks, base64 encode the chunks, and return the lot as a list of
     chunks, which are strings.
 
-    :param data:
-    :param compresslevel:
+    :param data: bytes
+    :param compresslevel: string: bz2 or gzip
     """
 
     if compresstype == 'bz2':
@@ -92,7 +92,7 @@ def encode_packet(data, filename, checksum, seqnum, seqmax, compression):
     Take an already encoded data string and encode it to a BitShuffle data
     packet.
 
-    :param data:
+    :param data: bytes
     """
 
     msg = "This is encoded with BitShuffle, which you can download " + \
