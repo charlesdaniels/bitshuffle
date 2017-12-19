@@ -2,12 +2,12 @@ language: python
 python:
     - "2.7"
     - "3.6"
+    - "nightly"
 # Sudo is required so that steup.py can be tested (TODO: investigate using
 # a virtualenv instead?)
 sudo: required
 os: linux
 install:
-  - pip3 install pycodestyle setuptools
   - pip install pycodestyle setuptools
   - gem install travis --no-rdoc --no-ri
 
