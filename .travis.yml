@@ -15,7 +15,7 @@ addons:
 
 os: linux
 install:
-  - pip install pycodestyle setuptools
+  - pip install pycodestyle setuptools pyinstaller
   - gem install travis --no-rdoc --no-ri
 
 script:
