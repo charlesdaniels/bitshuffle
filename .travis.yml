@@ -4,7 +4,8 @@ language: python
 sudo: required
 os: linux
 install:
-  - pip3 install pycodestyle
+  - pip3 install pycodestyle setuptools
+  - pip install pycodestyle setuptools
   - gem install travis --no-rdoc --no-ri
 
 cache:
