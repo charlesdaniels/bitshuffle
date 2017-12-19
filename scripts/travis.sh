@@ -6,9 +6,13 @@ set -ev
 
 OLDCWD=`pwd`
 WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
+# use 32 bit wine
+export WINEARCH=win32
+# set wine prefix to the default explicitly
+export WINEPREFIX=$HOME/.wine
 
 # basics
-sudo apt-get install -y unzip wget
+sudo apt-get install -y unzip wget tree
 
 # only 2.0 runs non-graphical installer
 sudo dpkg --add-architecture i386
@@ -19,8 +23,9 @@ sudo sh -c 'echo "deb https://dl.winehq.org/wine-builds/ubuntu/ trusty main" >> 
 sudo apt-get update
 sudo apt install --install-recommends winehq-stable
 
+
 # make config files on first run
-wine
+wine wineboot
 cd ~/.wine/drive_c
 mkdir python35
 cd python35
@@ -49,3 +54,6 @@ python -m pyinstaller --distpath dist/linux bitshuffle.py
 # make archive files
 tar -vczf dist/linux/bitshuffle.tar.gz dist/linux/bitshuffle
 zip -rA9 dist/windows/bitshuffle.zip dist/windows/bitshuffle
+
+# record build environment to console log
+tree .
