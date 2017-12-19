@@ -11,10 +11,6 @@ install:
   - pip install pycodestyle setuptools
   - gem install travis --no-rdoc --no-ri
 
-cache:
-  directories:
-    /home/travis/.wine
-
 script:
 - "./scripts/test_end2end.sh"
 - "./scripts/test_setup_py.sh"
