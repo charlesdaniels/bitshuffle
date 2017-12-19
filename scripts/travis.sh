@@ -27,7 +27,7 @@ sudo apt install --install-recommends winehq-stable
 # make config files on first run
 wine wineboot
 mkdir ~/.wine/drive_c/python35
-cd $_
+cd ~/.wine/drive_c/python35
 
 # need non-graphical installer i.e. zip file
 wget -O ~/.wine/drive_c/python35/python-3.5-win32.zip \
