@@ -17,13 +17,15 @@ RET1=$?
 RET2=$?
 "$PARENT_DIR/test_pycodestyle.sh"
 RET3=$?
+"$PARENT_DIR/test_travis_lint.sh"
+RET4=$?
 
-TOTAL_FAILED=$(echo "$RET1 + $RET2 + $RET3" | bc)
+TOTAL_FAILED=$(echo "$RET1 + $RET2 + $RET3 + $RET4" | bc)
 echo ""
 echo "- - - - -"
 echo "$TOTAL_FAILED total test failures"
 if [ $TOTAL_FAILED -gt 0 ] ; then
-	echo "One or more poroblems found, please fix these before committing."
+	echo "One or more problems found, please fix these before committing."
 else
 	echo "Everything looks ok, proceed with commit."
 fi

@@ -77,6 +77,4 @@ do_test () {
 
 }
 
-do_test 'python2'
-cd "$PROJECT_TLD"
-do_test 'python3'
+do_test 'python'
