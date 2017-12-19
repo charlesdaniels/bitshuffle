@@ -78,7 +78,7 @@ Why so Much CI / Testing?
 
 The amount of automated tests may seem high for a project as small as
 BitShuffle is. However, BitShuffle is intended to be a tool used on a daily
-basis (as it is by it's authors), inside of pipelines, and possibly inside of
+basis (as it is by its authors), inside of pipelines, and possibly inside of
 other automation. It is critical thus that it not break or behave in strange or
 unusual ways for the same reason ``ls`` needs to not break on weird edge cases
 - it's used too frequently.
@@ -98,13 +98,13 @@ then use BitShuffle as a Python module at your own risk.
 Installation
 ============
 
-Dependancies
+Dependencies
 ------------
 
 To install/run BitShuffle:
 
 * POSIX-ish operating system (Windows should work, but is not actively tested
-at this time).
+  at this time).
 
 * Either Python 2, or Python 3.
 
