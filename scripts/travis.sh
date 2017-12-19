@@ -5,7 +5,7 @@
 set -ev
 
 OLDCWD=`pwd`
-WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
+WINE_PYTHON="wine $HOME/.wine/drive_c/python35/python.exe"
 # use 32 bit wine
 export WINEARCH=win32
 # set wine prefix to the default explicitly
