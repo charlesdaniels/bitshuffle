@@ -22,7 +22,7 @@ TEMPFILE="/tmp/$(uuidgen)"
 find "$PROJECT_ROOT" -print | grep -v '.git' | while read -r line ; do
 	if file "$line" | grep -i 'shell script' > /dev/null 2>&1 ; then
 		echo "shellcheck for file '$line': "
-		shellcheck "$line"
+		shellcheck -s sh "$line"
 		RETCODE=$?
 		echo ""
 
