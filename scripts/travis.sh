@@ -28,12 +28,15 @@ sudo apt install --install-recommends winehq-stable
 wine wineboot
 mkdir ~/.wine/drive_c/python35
 cd ~/.wine/drive_c/python35
+pwd -P
+pwd -L
 
 # need non-graphical installer i.e. zip file
 wget -O ~/.wine/drive_c/python35/python-3.5-win32.zip \
 	https://www.python.org/ftp/python/3.5.0/python-3.5.0-embed-win32.zip
 unzip ~/.wine/drive_c/python35/python-3.5-win32.zip
 unzip ~/.wine/drive_c/python35/python35.zip
+ls -l
 $WINE_PYTHON --version
 rm -f ~/.wine/drive_c/python35/python*35*.zip
 $WINE_PYTHON --version
