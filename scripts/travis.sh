@@ -23,13 +23,10 @@ sudo sh -c 'echo "deb https://dl.winehq.org/wine-builds/ubuntu/ trusty main" >> 
 sudo apt-get update
 sudo apt install --install-recommends winehq-stable
 
-
 # make config files on first run
 wine wineboot
 mkdir ~/.wine/drive_c/python35
 cd ~/.wine/drive_c/python35
-pwd -P
-pwd -L
 
 # need non-graphical installer i.e. zip file
 wget -O ~/.wine/drive_c/python35/python-3.5-win32.zip \
@@ -53,8 +50,8 @@ pip install pyinstaller
 
 # actually make the files
 cd $OLDCWD
-$WINE_PYTHON -m pyinstaller --distpath dist/windows bitshuffle.py
-python -m pyinstaller --distpath dist/linux bitshuffle.py
+$WINE_PYTHON -m PyInstaller --distpath dist/windows bitshuffle.py
+python -m PyInstaller --distpath dist/linux bitshuffle.py 
 
 # make archive files
 tar -vczf dist/linux/bitshuffle.tar.gz dist/linux/bitshuffle
