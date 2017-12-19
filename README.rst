@@ -221,3 +221,16 @@ avoid regressions (see #39, #5).
 
 In addition to automated functionality tests, we also adhere strictly to PEP8,
 which is enforced by `pycodestyle`.
+
+Version Number Conventions
+--------------------------
+
+BitShuffle loosely follows [Semantic Versioning](https://semver.org). The
+following suffixes are used:
+
+* No suffix - implies this is a stable release.
+
+* ``-git`` - this version is from the BitShuffle git repository, and probably
+  has not been tested.
+
+* ``-RCX`` - the is the `Xth` release candidate for the relevant version.
