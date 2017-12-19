@@ -28,4 +28,4 @@ deploy:
 
 artifacts:
     - path: dist/bitshuffle.exe
-    - name: bitshuffle.exe
+      name: bitshuffle.exe
