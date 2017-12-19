@@ -110,8 +110,7 @@ Dependancies
 
 To install/run BitShuffle:
 
-* POSIX-ish operating system (Windows should work, but is not actively tested
-at this time).
+* POSIX-ish operating system, or Windows (as of #38).
 
 * Either Python 2, or Python 3.
 
@@ -126,7 +125,7 @@ To run BitShuffle's automated tests locally:
 Installing with ``setup.py``
 ----------------------------
 
-Simply run ``python ./setup.py install``. 
+Simply run ``python ./setup.py install``.
 
 Installing Manually
 -------------------
@@ -150,9 +149,12 @@ need to pass the automated TravisCI checks.
 If you would like to contribute by sending patches over e-mail, that is fine
 to, just get in touch with @charlesdaniels.
 
+Technical Details
+=================
 
-BitShuffel Data Packet Specification
-====================================
+
+BitShuffel Data Packet Specification (compatibilty level 1)
+-----------------------------------------------------------
 
 A BitShuffle data packet is a sequence of ASCII text. A data packet may be
 arbitrarily long. A data backed may contain arbitrary whitespace, which is
@@ -189,3 +191,33 @@ The data packed contains the following segments, in order:
 Segments marked as *encoded* indicate their contents is arbitrary data which
 has been compressed with the specified compression type, and encoded with the
 specified encoding format.
+
+Note that the data packet spec is labile to change without warning in
+non-release versions of BitShuffle. Any changes made since the last release
+will result in a compatibility level bump at time of release. Use non-release
+versions at your own risk.
+
+BitShuffle Automated Testing Strategy
+-------------------------------------
+
+BitShuffle is tested automatically by multiple CI systems (AppVeyor and
+TravisCI), executing a large battery of tests to ensure it is functioning
+correctly. These scripts are implemented in POSIX ``sh``, and are stored int
+the ``scritps/`` directory. A subset of these tests that are safe to run
+locally (do not modify the disk or require ``sudo``) can be executed with the
+script ``scripts/pre_commit_check.sh``. **Contributors should not open PRs for
+code that does not pass this script**.
+
+Note that Windows support is tested via a PowerShell script in ``scripts/``,
+which is intended to run only on AppVeyor. It executes only a few very simple
+smoke tests that ensure the program can run successfully on Windows, but does
+not exhaustively exercise every feature.
+
+Most of BitShuffle's tests are end-to-end/blackbox tests that aim to validate
+real-world use cases. At this time, BitShuffle is too small and monolithic for
+actual unit tests to be of value. In the future, a stable public API will be
+defined, at which time comprehensive unit tests will need to be written to
+avoid regressions (see #39, #5).
+
+In addition to automated functionality tests, we also adhere strictly to PEP8,
+which is enforced by `pycodestyle`.
