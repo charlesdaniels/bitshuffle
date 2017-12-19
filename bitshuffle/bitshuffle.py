@@ -249,9 +249,9 @@ def main():
 
 def find_editor():
     if 'VISUAL' in os.environ:
-        return os.environ['VISUAL']
+        return which(os.environ['VISUAL'])
     elif 'EDITOR' in os.environ:
-        return os.environ['EDITOR']
+        return which(os.environ['EDITOR'])
     else:
         for program in ['mimeopen', 'nano', 'vi', 'emacs',
                         'micro', 'notepad', 'notepad++']:
