@@ -10,8 +10,9 @@
 set -e
 set -u
 
-. "$(dirname $0)/realpath.sh"
-PARENT_DIR="$(realpath_sh $(dirname "$0"))"
+# shellcheck disable=SC1090
+. "$(dirname "$0")/realpath.sh"
+PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_TLD="$PARENT_DIR"
 echo "project root seems to be: $PROJECT_TLD"
 

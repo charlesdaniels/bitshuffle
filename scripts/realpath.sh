@@ -38,7 +38,7 @@
 #
 #  ---------
 #
-#  This software used and modified from its original version on 2016-12-31 by
+#  This software used and modified from its original version on 2017-12-19 by
 #  Charles Daniels.
 #
 #  Modified 2017-12-18 by Joshua Nelson
@@ -53,8 +53,8 @@ realpath_sh() {
 resolve_symlinks() {
     _assert_no_path_cycles "$@" || return
 
-    local dir_context path
     path=$(readlink -- "$1")
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         dir_context=$(dirname -- "$1")
         _resolve_symlinks "$(_prepend_dir_context_if_necessary "$dir_context" "$path")" "$@"
@@ -79,8 +79,6 @@ _prepend_path_if_relative() {
 }
 
 _assert_no_path_cycles() {
-    local target path
-
     target=$1
     shift
 
@@ -104,10 +102,9 @@ _canonicalize_dir_path() {
 }
 
 _canonicalize_file_path() {
-    local dir file
     dir=$(dirname -- "$1")
     file=$(basename -- "$1")
-    printf '%s/%s\n' $(_canonicalize_dir_path "$dir") "$file"
+    printf '%s/%s\n' "$(_canonicalize_dir_path "$dir")" "$file"
 }
 
 # Optionally, you may also want to include:
@@ -131,7 +128,6 @@ _emulated_readlink() {
 }
 
 _gnu_stat_readlink() {
-    local output
     output=$(stat -c %N -- "$1" 2>/dev/null) &&
 
     printf '%s\n' "$output" |

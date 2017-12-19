@@ -4,7 +4,7 @@
 # be verbose
 set -ev
 
-OLDCWD=`pwd`
+OLDCWD="$(pwd)"
 WINE_PYTHON="wine $HOME/.wine/drive_c/python35/python.exe"
 # use 32 bit wine
 export WINEARCH=win32
@@ -46,7 +46,7 @@ $WINE_PYTHON -m pip install pyinstaller
 pip install pyinstaller
 
 # actually make the files
-cd $OLDCWD
+cd "$OLDCWD"
 $WINE_PYTHON -m PyInstaller --one-file --distpath dist/windows bitshuffle.py
 python -m PyInstaller --one-file --distpath dist/linux bitshuffle.py
 

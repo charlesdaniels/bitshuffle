@@ -2,6 +2,6 @@
 ./setup.py sdist
 ./setup.py bdist_wheel
 printf 'Upload project to PyPI? [no]: '
-read confirm
-if [[ $confirm = y* ]] ; then twine upload dist/*; fi
+read -r confirm
+if echo "$confirm" | grep '^y.*'; then twine upload dist/*; fi
 
