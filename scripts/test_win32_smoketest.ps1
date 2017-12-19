@@ -59,6 +59,9 @@ if ($ret1 -and $ret2 -and $compare_result) {
     Write-Warning "Test failed."
     Write-Output "$rand_file_hash did not match $test_hash_1"
     $failed_tests = $failed_tests + 1;
+
+    cat "rand_test_file.bin"
+    cat "test_2.bin"
 }
 
 Write-Output "$failed_tests test failed"
