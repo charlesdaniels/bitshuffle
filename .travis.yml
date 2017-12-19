@@ -8,26 +8,15 @@ python:
 sudo: required
 addons:
   apt:
+    sources:
+    - debian-sid  # needed for shellcheck
     packages:
-    - realpath # required by script
-    - cabal-install
-    - ghc
+    - shellcheck
+
 os: linux
 install:
   - pip install pycodestyle setuptools
   - gem install travis --no-rdoc --no-ri
-
-  # https://github.com/koalaman/shellcheck/wiki/TravisCI
-  - curl -L "https://raw.githubusercontent.com/Lin-Buo-Ren/Utilities-for-Travis-CI/master/Build%20and%20Setup%20ShellCheck's%20Latest%20Release.bash" -o setup_shellcheck.bash
-  - chmod +x setup_shellcheck.bash
-  - ./setup_shellcheck.bash --without-root
-
-before_cache:
-- rm $HOME/.cabal/logs/build.log
-
-cache:
-  directories:
-  - $HOME/.cabal
 
 script:
 - "./scripts/test_end2end.sh"
