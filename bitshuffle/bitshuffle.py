@@ -40,6 +40,11 @@ except AttributeError:  # python2
         with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
             return f.read()
 
+try:
+    file_type = file
+except NameError:
+    file_type = io.TextIOWrapper
+
 
 version = '0.0.1'
 
@@ -189,8 +194,8 @@ def main():
     # args.output are open file handles (or crashes the script if not).
     args = set_defaults(args)
 
-    assert type(args.input) is not str
-    assert type(args.output) is not str
+    assert isinstance(args.input, file_type)
+    assert isinstance(args.output, file_type)
 
     # Main
     if args.encode:
@@ -239,7 +244,7 @@ def main():
             # python 2
             args.output.write(payload)
 
-        if is_tmp and tmpfile is not None:
+        if is_tmp and tmpfile:
             os.remove(tmpfile)
 
         if checksum_ok:
@@ -374,18 +379,18 @@ def set_defaults(args):
             args.__dict__[arg] = defaults[arg]
 
     # open args.input and args.output so they are file handles
-    if type(args.input) is str:
+    if not isinstance(args.input, file_type):
         try:
             args.input = open(args.input, 'rb')
-        except Exception as e:
+        except IOError as e:
             stderr.write("FATAL: could not open '{}'\n".format(args.input))
             stderr.write("exception was: {}\n".format(e))
             sys.exit(4)
 
-    if type(args.output) is str:
+    if not isinstance(args.output, file_type):
         try:
             args.output = open(args.output, 'wb')
-        except Exception as e:
+        except IOError as e:
             stderr.write("FATAL: could not open '{}'\n".format(args.output))
             stderr.write("exception was: {}\n".format(e))
             sys.exit(4)
@@ -408,8 +413,7 @@ def verify(data, given_hash):
 
 
 def check_for_file(filename):
-    if type(filename) is not str:
-        # this is a file, and its already open
+    if isinstance(filename, file_type):
         return True
     try:
         open(filename).close()
