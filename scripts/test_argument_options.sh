@@ -74,13 +74,10 @@ expect_usage_error -t gmander
 LOG_FILE="/tmp/`uuidgen`"
 printf "When given bad input, prints file not found... "
 $BITSHUFFLE --input /nonexistent/nope > "$LOG_FILE" 2>&1
-if [ "`cat $LOG_FILE`" = "Error: Input file not found" ]; then
+if grep -i 'could not open' < "$LOG_FILE" > /dev/null 2>&1 ; then
     echo "PASSED"
 else
     printf "FAILED\n\n"
-
-    printf "\t'Error: Input file not found' \
-             does not match logfile\n\n"
 
     print_log_file $LOG_FILE
     TESTS_FAILED=`echo $TESTS_FAILED + 1 | bc`
@@ -89,4 +86,3 @@ fi
 
 printf "\n$TESTS_FAILED tests failed.\n"
 exit $TESTS_FAILED
-

@@ -40,6 +40,11 @@ except AttributeError:  # python2
         with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
             return f.read()
 
+try:
+    file_type = file
+except NameError:
+    file_type = io.IOBase
+
 
 version = '0.0.1'
 
@@ -86,7 +91,7 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, filename, checksum, seqnum, seqmax, compression):
+def encode_packet(data, checksum, seqnum, seqmax, compression):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -101,13 +106,13 @@ def encode_packet(data, filename, checksum, seqnum, seqmax, compression):
     encoding = "base64"
     data = data.decode(encoding="ascii")
 
-    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
+    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, filename, checksum, data)
+                        seqmax, checksum, data)
     return packet
 
 
-def encode_file(fhandle, chunksize, compresslevel, compresstype, filename):
+def encode_file(fhandle, chunksize, compresslevel, compresstype):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -116,14 +121,18 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype, filename):
     :param fhandle:
     """
 
-    data = fhandle.read()
+    try:
+        # Python 3
+        data = fhandle.buffer.read()
+    except Exception as e:
+        data = fhandle.read()
     checksum = hashlib.sha1(data).hexdigest()
     chunks = encode_data(data, chunksize, compresslevel, compresstype)
     seqmax = len(chunks) - 1
     seqnum = 0
     packets = []
     for c in chunks:
-        packets.append(encode_packet(c, filename, checksum, seqnum,
+        packets.append(encode_packet(c, checksum, seqnum,
                                      seqmax, compresstype))
         seqnum += 1
 
@@ -138,10 +147,6 @@ def main():
 
     parser.add_argument("--output", "-o",
                         help="Output file. Defaults to stdout.")
-
-    parser.add_argument("--filename", "-f",
-                        help="Set filename to use when encoding " +
-                        "explicitly")
 
     parser.add_argument("--encode", "-e", action="store_true",
                         help="Generate a BitShuffle data packet from" +
@@ -185,35 +190,33 @@ def main():
     # Encode & Decode inference
     args = infer_mode(args)
 
-    # Set default values
+    # Set default values. Note that this ensures that args.input and
+    # args.output are open file handles (or crashes the script if not).
     args = set_defaults(args)
+
+    assert isinstance(args.input, file_type)
+    assert isinstance(args.output, file_type)
 
     # Main
     if args.encode:
         if args.compresstype not in ['bz2', 'gzip']:
             parser.print_help()
             sys.exit(1)
-
-        elif check_for_file(args.input):
-            with open(args.input, 'rb') as f:
-                packets = encode_file(f, args.chunksize, args.compresslevel,
-                                      args.compresstype, args.filename)
-                with open(args.output, 'w') as of:
-                    for p in packets:
-                        of.write(p)
-                        of.write("\n\n")
-
-                    of.flush()
         else:
-            print('Error: Input file not found')
-            sys.exit(4)
+            packets = encode_file(args.input, args.chunksize,
+                                  args.compresslevel, args.compresstype)
+            for p in packets:
+                args.output.write(p)
+                args.output.write("\n\n")
+
+            args.output.flush()
 
     elif args.decode:
 
-        infile = args.input
         # set to True for infile to be deleted after decoding
         is_tmp = False
-        if stdin.isatty() and args.input == '/dev/stdin':
+        tmpfile = None
+        if stdin.isatty() and args.input is stdin:
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
             if not args.editor:
@@ -231,20 +234,26 @@ def main():
                          "do not need to delete this message.\n\n")
                 tf.flush()
             subprocess.call([args.editor, tmpfile])
-            infile = tmpfile
+            args.input = open(tmpfile, 'r')
 
-        with open(infile, 'r') as f:
-            payload, checksum_ok = decode(f.read())
-            with open(args.output, 'wb') as of:
-                    of.write(payload)
+        payload, checksum_ok = decode(args.input.read())
+        try:
+            # python 3
+            args.output.buffer.write(payload)
+        except Exception as e:
+            # python 2
+            args.output.write(payload)
 
-        if is_tmp:
-            os.remove(infile)
+        if is_tmp and tmpfile:
+            os.remove(tmpfile)
 
         if checksum_ok:
             sys.exit(0)
         else:
             sys.exit(8)
+
+    args.input.close()
+    args.output.close()
 
 
 def find_editor():
@@ -267,7 +276,7 @@ def find_editor():
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
-            seq_end, name, checksum, chunk = range(9)
+            seq_end, checksum, chunk = range(8)
 
         try:
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
@@ -328,7 +337,7 @@ def infer_mode(args):
         return args
 
     elif any((args.compresstype, args.compresslevel,
-              args.chunksize, args.filename)):
+              args.chunksize)):
         args.encode = True
 
     # this is a submenu: could specify editor to compose
@@ -361,7 +370,7 @@ def infer_mode(args):
 
 def set_defaults(args):
 
-    defaults = {'input': '/dev/stdin', 'output': '/dev/stdout',
+    defaults = {'input': stdin, 'output': stdout,
                 'editor': find_editor(), 'chunksize': 2048,
                 'compresslevel': 5, 'compresstype': 'bz2'}
 
@@ -369,8 +378,22 @@ def set_defaults(args):
         if arg in defaults and not args.__dict__[arg]:
             args.__dict__[arg] = defaults[arg]
 
-    if not args.filename:
-        args.filename = os.path.basename(args.input)
+    # open args.input and args.output so they are file handles
+    if not isinstance(args.input, file_type):
+        try:
+            args.input = open(args.input, 'rb')
+        except IOError as e:
+            stderr.write("FATAL: could not open '{}'\n".format(args.input))
+            stderr.write("exception was: {}\n".format(e))
+            sys.exit(4)
+
+    if not isinstance(args.output, file_type):
+        try:
+            args.output = open(args.output, 'wb')
+        except IOError as e:
+            stderr.write("FATAL: could not open '{}'\n".format(args.output))
+            stderr.write("exception was: {}\n".format(e))
+            sys.exit(4)
 
     return args
 
@@ -390,6 +413,8 @@ def verify(data, given_hash):
 
 
 def check_for_file(filename):
+    if isinstance(filename, file_type):
+        return True
     try:
         open(filename).close()
         return True
