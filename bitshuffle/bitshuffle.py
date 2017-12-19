@@ -4,6 +4,8 @@
 #
 # BitShuffle command-line client. Supports encoding & decoding.
 #
+# Run with --help for usage information.
+#
 # .ENDOC
 
 import os
@@ -140,30 +142,39 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="A tool for encoding and " +
+                                     "decoding arbitrary binary data to " +
+                                     "ASCII test")
 
     parser.add_argument("--input", "-i",
-                        help="Input file. Defaults to stdin.")
+                        help="Input file. Defaults to stdin. If the only " +
+                        "argument, implies --encode")
 
     parser.add_argument("--output", "-o",
-                        help="Output file. Defaults to stdout.")
+                        help="Output file. Defaults to stdout. If the only " +
+                        "argument, and stdin is not a tty, implies " +
+                        "--decode")
 
     parser.add_argument("--encode", "-e", action="store_true",
                         help="Generate a BitShuffle data packet from" +
-                             "the input file")
+                             "the input file and write it to the output.")
 
     parser.add_argument("--decode", "-d", "-D", action="store_true",
-                        help="Extract a BitShuffle data packet.")
+                        help="Extract BitShuffle data packet(s) from the " +
+                        "the input file, and write the decoded file to the " +
+                        "output file.")
 
     parser.add_argument("--version", "-v", action="store_true",
-                        help="Displays the current version of bitshuffle")
+                        help="Displays the current version of bitshuffle.")
 
     parser.add_argument("--chunksize", "-c", type=int,
                         help="Chunk size in bytes. Defaults to 2048.")
 
     parser.add_argument("--compresslevel", '-m', type=int,
                         help="Compression level when encoding. " +
-                        "1 is lowest, 9 is highest. Defaults to 5.")
+                        "1 is lowest, 9 is highest. Defaults to 5. " +
+                        "Ignore if specified compresstype does not support" +
+                        " multiple compression levels.")
 
     parser.add_argument("--editor", "-E",
                         help="Editor to use for pasting packets. " +
@@ -174,7 +185,7 @@ def main():
     parser.add_argument("--compresstype", '-t',
                         help="Type of compression to use. Defaults to bz2. " +
                              "Ignored if decoding packets. " +
-                             "Currently supported: 'bz2', 'gzip'")
+                             "Currently supported: 'bz2', 'gzip'.")
 
     args = parser.parse_args()
 
