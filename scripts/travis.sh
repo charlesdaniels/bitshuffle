@@ -12,7 +12,7 @@ export WINEARCH=win32
 export WINEPREFIX=$HOME/.wine
 
 # basics
-sudo apt-get install -y unzip wget tree
+sudo apt-get install -y unzip wget tree > /dev/null
 
 # only 2.0 runs non-graphical installer
 sudo dpkg --add-architecture i386
@@ -20,23 +20,20 @@ wget -nc https://dl.winehq.org/wine-builds/Release.key
 sudo apt-key add Release.key
 rm Release.key
 sudo sh -c 'echo "deb https://dl.winehq.org/wine-builds/ubuntu/ trusty main" >> /etc/apt/sources.list'
-sudo apt-get update
-sudo apt install --install-recommends winehq-stable
+sudo apt-get update > /dev/null
+sudo apt install --install-recommends winehq-stable > /dev/null
 
 # make config files on first run
-wine wineboot
+wine wineboot > /dev/null
 mkdir ~/.wine/drive_c/python35
 cd ~/.wine/drive_c/python35
 
 # need non-graphical installer i.e. zip file
 wget -O ~/.wine/drive_c/python35/python-3.5-win32.zip \
 	https://www.python.org/ftp/python/3.5.0/python-3.5.0-embed-win32.zip
-unzip ~/.wine/drive_c/python35/python-3.5-win32.zip
-unzip ~/.wine/drive_c/python35/python35.zip
-ls -l
-$WINE_PYTHON --version
+unzip ~/.wine/drive_c/python35/python-3.5-win32.zip > /dev/null
+unzip ~/.wine/drive_c/python35/python35.zip > /dev/null
 rm -f ~/.wine/drive_c/python35/python*35*.zip
-$WINE_PYTHON --version
 
 # pip is not included in python install
 wget https://bootstrap.pypa.io/get-pip.py
@@ -50,8 +47,8 @@ pip install pyinstaller
 
 # actually make the files
 cd $OLDCWD
-$WINE_PYTHON -m PyInstaller --distpath dist/windows bitshuffle.py
-python -m PyInstaller --distpath dist/linux bitshuffle.py 
+$WINE_PYTHON -m PyInstaller --one-file --distpath dist/windows bitshuffle.py
+python -m PyInstaller --one-file --distpath dist/linux bitshuffle.py
 
 # make archive files
 tar -vczf dist/linux/bitshuffle.tar.gz dist/linux/bitshuffle
