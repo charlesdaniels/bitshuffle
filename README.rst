@@ -7,8 +7,15 @@ BitShuffle README
 Build Status
 ============
 
+TravisCI:
+
 .. image:: https://travis-ci.org/charlesdaniels/bitshuffle.svg?branch=master
     :target: https://travis-ci.org/charlesdaniels/bitshuffle
+
+AppVeyor:
+
+.. image:: https://ci.appveyor.com/api/projects/status/h7h2a8ltcxkk4926?svg=true
+   :target: https://ci.appveyor.com/project/charlesdaniels/bitshuffle
 
 Introduction
 ============
