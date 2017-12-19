@@ -6,6 +6,10 @@ set -ev
 
 OLDCWD=`pwd`
 WINE_PYTHON="wine ~/.wine/drive_c/python35/python.exe"
+# use 32 bit wine
+export WINEARCH=win32
+# set wine prefix to the default explicitly
+export WINEPREFIX=~/.wine
 
 # basics
 sudo apt-get install -y unzip wget tree
@@ -21,7 +25,7 @@ sudo apt install --install-recommends winehq-stable
 
 
 # make config files on first run
-wine
+wine wineboot
 cd ~/.wine/drive_c
 mkdir python35
 cd python35
