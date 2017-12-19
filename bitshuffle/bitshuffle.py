@@ -144,7 +144,7 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
 def main():
     parser = argparse.ArgumentParser(description="A tool for encoding and " +
                                      "decoding arbitrary binary data to " +
-                                     "ASCII test")
+                                     "ASCII text.")
 
     parser.add_argument("--input", "-i",
                         help="Input file. Defaults to stdin. If the only " +

@@ -153,7 +153,7 @@ Technical Details
 =================
 
 
-BitShuffel Data Packet Specification (compatibilty level 1)
+BitShuffle Data Packet Specification (compatibilty level 1)
 -----------------------------------------------------------
 
 A BitShuffle data packet is a sequence of ASCII text. A data packet may be
