@@ -185,8 +185,8 @@ def main():
     # args.output are open file handles (or crashes the script if not).
     args = set_defaults(args)
 
-    assert type(args.input) is file
-    assert type(args.output) is file
+    assert type(args.input) is not str
+    assert type(args.output) is not str
 
     # Main
     if args.encode:
@@ -365,7 +365,7 @@ def set_defaults(args):
             args.__dict__[arg] = defaults[arg]
 
     # open args.input and args.output so they are file handles
-    if type(args.input) is not file:
+    if type(args.input) is str:
         try:
             args.input = open(args.input, 'rb')
         except Exception as e:
@@ -373,7 +373,7 @@ def set_defaults(args):
             stderr.write("exception was: {}\n".format(e))
             sys.exit(4)
 
-    if type(args.output) is not file:
+    if type(args.output) is str:
         try:
             args.output = open(args.output, 'wb')
         except Exception as e:
@@ -399,7 +399,7 @@ def verify(data, given_hash):
 
 
 def check_for_file(filename):
-    if type(filename) is file:
+    if type(filename) is not str:
         # this is a file, and its already open
         return True
     try:
