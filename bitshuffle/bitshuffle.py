@@ -43,7 +43,7 @@ except AttributeError:  # python2
 try:
     file_type = file
 except NameError:
-    file_type = io.TextIOWrapper
+    file_type = io.IOBase
 
 
 version = '0.0.1'
@@ -380,6 +380,7 @@ def set_defaults(args):
 
     # open args.input and args.output so they are file handles
     if not isinstance(args.input, file_type):
+        stderr.write("opening input")
         try:
             args.input = open(args.input, 'rb')
         except IOError as e:
@@ -388,6 +389,7 @@ def set_defaults(args):
             sys.exit(4)
 
     if not isinstance(args.output, file_type):
+        stderr.write("opening output")
         try:
             args.output = open(args.output, 'wb')
         except IOError as e:
