@@ -116,7 +116,11 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
     :param fhandle:
     """
 
-    data = fhandle.read()
+    try:
+        # Python 3
+        data = fhandle.buffer.read()
+    except Exception as e:
+        data = fhandle.read()
     checksum = hashlib.sha1(data).hexdigest()
     chunks = encode_data(data, chunksize, compresslevel, compresstype)
     seqmax = len(chunks) - 1
@@ -228,7 +232,12 @@ def main():
             args.input = open(tmpfile, 'r')
 
         payload, checksum_ok = decode(args.input.read())
-        args.output.write(payload)
+        try:
+            # python 3
+            args.output.buffer.write(payload)
+        except Exception as e:
+            # python 2
+            args.output.write(payload)
 
         if is_tmp and tmpfile is not None:
             os.remove(tmpfile)
