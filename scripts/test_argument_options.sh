@@ -79,8 +79,6 @@ if grep -i 'could not open' < "$LOG_FILE" > /dev/null 2>&1 ; then
 else
     printf "FAILED\n\n"
 
-    echo "Expected error message, but got: $(cat $LOG_FILE)"
-
     print_log_file $LOG_FILE
     TESTS_FAILED=`echo $TESTS_FAILED + 1 | bc`
     rm -f $LOG_FILE
