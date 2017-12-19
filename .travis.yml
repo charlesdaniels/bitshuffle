@@ -31,8 +31,11 @@ notifications:
     on_failure: always
 
 before_deploy:
+- "export MY_UID=$(id -u)"
 - "if ! [ -d dist ]; then sudo mkdir dist; fi"
-- "sudo chown $(id -u) dist"
+- "sudo chown -R $MY_UID dist"
+- "if ! [ -d build ]; then sudo mkdir build; fi"
+- "sudo chown -R $MY_UID build"
 # makes a linux executable in dist/bitshuffle
 - "pyinstaller --onefile bitshuffle/bitshuffle.py"
 
