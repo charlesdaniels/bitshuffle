@@ -106,7 +106,7 @@ To install/run BitShuffle:
 * POSIX-ish operating system (Windows should work, but is not actively tested
   at this time).
 
-* Either Python 2, or Python 3.
+* Python (>= 2.7)
 
 To run BitShuffle's automated tests locally:
 
@@ -120,6 +120,7 @@ Installing with ``setup.py``
 ----------------------------
 
 Simply run ``python ./setup.py install``. 
+(Note: this assumes ``which python`` is identical to ``python``)
 
 Installing Manually
 -------------------
@@ -132,16 +133,20 @@ Installing a Binary Release
 ---------------------------
 
 This is not possible yet, but in the future, there will be static builds of
-BitShuffle that can be run standalone. See also #11.
+BitShuffle that can be run standalone.
+See also `#11 <https://github.com/charlesdaniels/bitshuffle/issues/11>`_.
 
 Contributing
 ============
 
-Contributions are welcome! Simply open a GitHub pull request. All contributions
-need to pass the automated TravisCI checks.
+Contributions are welcome! Simply open a GitHub
+`pull request <https://github.com/charlesdaniels/bitshuffle/compare>`_. All contributions
+need to pass the automated TravisCI checks, most of which are available as
+`a script <https://github.com/charlesdaniels/bitshuffle/blob/dev/scripts/pre_commit_check.sh>`_
+(I recommend symlinking ``scripts/pre-commit`` to ``.git/hooks/``).
 
 If you would like to contribute by sending patches over e-mail, that is fine
-to, just get in touch with @charlesdaniels.
+too, just get in touch with `@charlesdaniels <https://github.com/charlesdaniels>`_.
 
 
 BitShuffel Data Packet Specification
@@ -169,14 +174,13 @@ whitespace is ignored entirely.
 The data packed contains the following segments, in order:
 
 * Message indicating that this a BitShuffle data packet, with a link to
-  download BitShuffle.
-* BitShuffle data packet format compatibility level (currently set to ``1``).
-* BitShuffle data encoding format (current set to ``base64``).
-* BitShuffle data compression type (currently set to ``bz2``).
+  download BitShuffle. Note that the decoder does not support line breaks in this
+  segment (see `#10 <https://github.com/charlesdaniels/bitshuffle/issues/10>`_).
+* BitShuffle data packet format compatibility level (currently ``1``).
+* BitShuffle data encoding format (current ``base64``).
+* BitShuffle data compression type (currently either ``bz2`` or ``gzip``).
 * BitShuffle packet sequence number (i.e. `23`).
-* BitShuffle packet sequence end (the sequence number of the last packet in the
-  message).
-* Name of encoded file
+* BitShuffle packet sequence end (the number of packets in the message).
 * BitShuffle data checksum (encoded)
 * BitShuffle data chunk (encoded)
 
