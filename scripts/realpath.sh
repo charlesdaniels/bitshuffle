@@ -128,7 +128,6 @@ _emulated_readlink() {
 }
 
 _gnu_stat_readlink() {
-    output
     output=$(stat -c %N -- "$1" 2>/dev/null) &&
 
     printf '%s\n' "$output" |
