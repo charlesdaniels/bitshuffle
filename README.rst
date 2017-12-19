@@ -85,7 +85,7 @@ Why so Much CI / Testing?
 
 The amount of automated tests may seem high for a project as small as
 BitShuffle is. However, BitShuffle is intended to be a tool used on a daily
-basis (as it is by it's authors), inside of pipelines, and possibly inside of
+basis (as it is by its authors), inside of pipelines, and possibly inside of
 other automation. It is critical thus that it not break or behave in strange or
 unusual ways for the same reason ``ls`` needs to not break on weird edge cases
 - it's used too frequently.
@@ -105,14 +105,14 @@ then use BitShuffle as a Python module at your own risk.
 Installation
 ============
 
-Dependancies
+Dependencies
 ------------
 
 To install/run BitShuffle:
 
 * POSIX-ish operating system, or Windows (as of #38).
 
-* Either Python 2, or Python 3.
+* Python (>= 2.7)
 
 To run BitShuffle's automated tests locally:
 
@@ -121,11 +121,13 @@ To run BitShuffle's automated tests locally:
 * ``travis`` (hint: ``gem install travis``)
 * ``bc``
 * ``/tmp`` must exist and be write-able
+* ``pycodestyle``
 
 Installing with ``setup.py``
 ----------------------------
 
 Simply run ``python ./setup.py install``.
+(Note: this assumes ``which python`` is identical to ``python``)
 
 Installing Manually
 -------------------
@@ -138,16 +140,20 @@ Installing a Binary Release
 ---------------------------
 
 This is not possible yet, but in the future, there will be static builds of
-BitShuffle that can be run standalone. See also #11.
+BitShuffle that can be run standalone.
+See also `#11 <https://github.com/charlesdaniels/bitshuffle/issues/11>`_.
 
 Contributing
 ============
 
-Contributions are welcome! Simply open a GitHub pull request. All contributions
-need to pass the automated TravisCI checks.
+Contributions are welcome! Simply open a GitHub
+`pull request <https://github.com/charlesdaniels/bitshuffle/compare>`_. All contributions
+need to pass the automated TravisCI checks, most of which are available as
+`a script <https://github.com/charlesdaniels/bitshuffle/blob/dev/scripts/pre_commit_check.sh>`_
+(I recommend symlinking ``scripts/pre-commit`` to ``.git/hooks/``).
 
 If you would like to contribute by sending patches over e-mail, that is fine
-to, just get in touch with @charlesdaniels.
+too, just get in touch with `@charlesdaniels <https://github.com/charlesdaniels>`_.
 
 Technical Details
 =================
@@ -178,13 +184,13 @@ whitespace is ignored entirely.
 The data packed contains the following segments, in order:
 
 * Message indicating that this a BitShuffle data packet, with a link to
-  download BitShuffle.
-* BitShuffle data packet format compatibility level (currently set to ``1``).
-* BitShuffle data encoding format (current set to ``base64``).
-* BitShuffle data compression type (currently set to ``bz2``).
+  download BitShuffle. Note that the decoder does not support line breaks in this
+  segment (see `#10 <https://github.com/charlesdaniels/bitshuffle/issues/10>`_).
+* BitShuffle data packet format compatibility level (currently ``1``).
+* BitShuffle data encoding format (current ``base64``).
+* BitShuffle data compression type (currently either ``bz2`` or ``gzip``).
 * BitShuffle packet sequence number (i.e. `23`).
-* BitShuffle packet sequence end (the sequence number of the last packet in the
-  message).
+* BitShuffle packet sequence end (the number of packets in the message).
 * BitShuffle data checksum (encoded)
 * BitShuffle data chunk (encoded)
 
@@ -192,7 +198,7 @@ Segments marked as *encoded* indicate their contents is arbitrary data which
 has been compressed with the specified compression type, and encoded with the
 specified encoding format.
 
-Note that the data packet spec is labile to change without warning in
+Note that the data packet spec is liable to change without warning in
 non-release versions of BitShuffle. Any changes made since the last release
 will result in a compatibility level bump at time of release. Use non-release
 versions at your own risk.
@@ -203,15 +209,17 @@ BitShuffle Automated Testing Strategy
 BitShuffle is tested automatically by multiple CI systems (AppVeyor and
 TravisCI), executing a large battery of tests to ensure it is functioning
 correctly. These scripts are implemented in POSIX ``sh``, and are stored int
-the ``scritps/`` directory. A subset of these tests that are safe to run
+the ``scripts/`` directory. A subset of these tests that are safe to run
 locally (do not modify the disk or require ``sudo``) can be executed with the
-script ``scripts/pre_commit_check.sh``. **Contributors should not open PRs for
-code that does not pass this script**.
+script ``scripts/pre_commit_check.sh``. For convenience, only one version of 
+python is tested locally. **Contributors should not open PRs for code that
+does not pass this script**.
 
-Note that Windows support is tested via a PowerShell script in ``scripts/``,
+Note that Windows support is tested via a
+`PowerShell script <https://github.com/charlesdaniels/bitshuffle/blob/dev/scripts/test_win32_smoketest.ps1>`_,
 which is intended to run only on AppVeyor. It executes only a few very simple
 smoke tests that ensure the program can run successfully on Windows, but does
-not exhaustively exercise every feature.
+not exhaustively test every feature.
 
 Most of BitShuffle's tests are end-to-end/blackbox tests that aim to validate
 real-world use cases. At this time, BitShuffle is too small and monolithic for
