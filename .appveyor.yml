@@ -1,0 +1,15 @@
+environment:
+
+    matrix:
+
+        - PYTHON: "C:\\Python27"
+
+install:
+    - "%PYTHON%\\python.exe --version"
+    - "%PYTHON%\\python.exe -m pip install setuptools pyinstaller"
+
+# this makes AppVeyor not try to use msbuild
+build: off
+
+test_script:
+    - ps: "scripts/test_win32_smoketest.ps1 -python_bin python"
