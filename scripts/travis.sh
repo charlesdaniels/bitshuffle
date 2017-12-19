@@ -34,7 +34,9 @@ wget -O ~/.wine/drive_c/python35/python-3.5-win32.zip \
 	https://www.python.org/ftp/python/3.5.0/python-3.5.0-embed-win32.zip
 unzip ~/.wine/drive_c/python35/python-3.5-win32.zip
 unzip ~/.wine/drive_c/python35/python35.zip
+$WINE_PYTHON --version
 rm -f ~/.wine/drive_c/python35/python*35*.zip
+$WINE_PYTHON --version
 
 # pip is not included in python install
 wget https://bootstrap.pypa.io/get-pip.py
