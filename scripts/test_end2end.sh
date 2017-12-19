@@ -1,4 +1,12 @@
 #!/bin/sh
+# shellcheck disable=SC2016
+# shellcheck disable=SC1004
+
+# SC2016 is disabled because we have lots of string literals that get eval-ed
+# later in the script.
+
+# SC1004 is disabled because there are a number of places where we want
+# backslash + newline litera in this script.
 
 # .SHELLDOC
 
@@ -6,11 +14,17 @@
 
 # .ENDOC
 
-. "$(dirname $0)/realpath.sh"
-PARENT_DIR="$(realpath_sh $(dirname "$0"))"
+# shellcheck disable=SC1090
+. "$(dirname "$0")/realpath.sh"
+PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_ROOT="$PARENT_DIR/.."
 BITSHUFFLE_FILE="$PROJECT_ROOT/bitshuffle/bitshuffle.py"
+
+# shellcheck disable=SC2034
 BITSHUFFLE="python $BITSHUFFLE_FILE"
+# this variable appears unused to ShellCheck because it is only used inside
+# of eval-ed code.
+
 if [ ! -f "$BITSHUFFLE_FILE" ] ; then
 	echo "FATAL: '$BITSHUFFLE_FILE' does not exist"
 	exit 9999
@@ -35,10 +49,10 @@ do_test () {
 	else
 		printf "FAILED\n\n"
 
-		printf "\t$TEMPFILE_SRC_SHA does not match $TEMPFILE_DST_SHA\n"
+		printf "\t%s does not match %s\n" "$TEMPFILE_SRC_SHA" "$TEMPFILE_DST_SHA"
 		echo
 		while read -r ln  ; do
-			printf "\t$ln\n"
+			printf "\t%n\n" "$ln"
 		done < "$LOG_FILE"
 		printf "\n\n"
 		TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
@@ -95,5 +109,5 @@ TESTS_FAILED=0
 
 all_tests
 
-printf "\n$TESTS_FAILED tests failed\n"
+printf "\n%s tests failed\n" "$TESTS_FAILED"
 exit $TESTS_FAILED

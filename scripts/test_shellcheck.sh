@@ -1,8 +1,9 @@
 #!/bin/sh
 
-# .SCRIPTDOC
+# .SHELLDOC
 #
-# Run PyCodeStyle on every python file under the project root.
+# Checks all shell scripts under the project TLD for compliance with
+# ShellCheck.
 #
 # .ENDOC
 
@@ -16,10 +17,12 @@ PROJECT_ROOT="$PARENT_DIR/.."
 TOTAL=0
 RETCODE=0
 TEMPFILE="/tmp/$(uuidgen)"
-find "$PROJECT_ROOT" -print | while read -r line ; do
-	if file "$line" | grep -i 'python script' > /dev/null 2>&1 ; then
-		echo "pycodestyle for file '$line': "
-		pycodestyle "$line"
+# the grep -v '.git' prevents git's default hooks from causing ShellCheck
+# defects.
+find "$PROJECT_ROOT" -print | grep -v '.git' | while read -r line ; do
+	if file "$line" | grep -i 'shell script' > /dev/null 2>&1 ; then
+		echo "shellcheck for file '$line': "
+		shellcheck "$line"
 		RETCODE=$?
 		echo ""
 
@@ -30,6 +33,6 @@ find "$PROJECT_ROOT" -print | while read -r line ; do
 done
 
 TOTAL="$(cat "$TEMPFILE")"
-echo "$TOTAL total defects across all files"
+echo "$TOTAL defective files"
 rm -f "$TEMPFILE"
 exit "$TOTAL"

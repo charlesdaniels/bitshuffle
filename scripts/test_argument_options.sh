@@ -7,8 +7,9 @@
 
 # .ENDOC
 
-. "$(dirname $0)/realpath.sh"
-TEST_DIR="$(realpath_sh $(dirname "$0"))"
+# shellcheck disable=SC1090
+. "$(dirname "$0")/realpath.sh"
+TEST_DIR="$(realpath_sh "$(dirname "$0")")"
 BITSHUFFLE="$TEST_DIR/../bitshuffle/bitshuffle.py"
 TESTS_FAILED=0
 
@@ -23,24 +24,25 @@ fi
 print_log_file() {
 # takes 1 parameter, a text file
         while read -r line; do
-                printf "\t$line\n"
-        done < $1
+                printf "\t%s\n" "$line"
+        done < "$1"
         printf "\n\n"
 }
 
 
 expect_usage_error () {
-        LOG_FILE="/tmp/`uuidgen`"
+        LOG_FILE="/tmp/$(uuidgen)"
+        # shellcheck disable=SC2068
         $BITSHUFFLE $@ > "$LOG_FILE" 2>&1
-        if grep -q "usage: .*" $LOG_FILE; then
+        if grep -q "usage: .*" "$LOG_FILE" ; then
                 echo "PASSED"
         else
                 printf "FAILED\n\n"
 
-                printf "\t'usage: .*' does not match logfile\n\n" 
-                print_log_file $LOG_FILE
-                TESTS_FAILED=`echo "$TESTS_FAILED + 1" | bc`
-                rm -f $LOG_FILE
+                printf "\t'usage: .*' does not match logfile\n\n"
+                print_log_file "$LOG_FILE"
+                TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
+                rm -f "$LOG_FILE"
         fi
 }
 
@@ -71,7 +73,7 @@ expect_usage_error -t gmander
 #        rm -f $LOG_FILE
 #fi
 
-LOG_FILE="/tmp/`uuidgen`"
+LOG_FILE="/tmp/$(uuidgen)"
 printf "When given bad input, prints file not found... "
 $BITSHUFFLE --input /nonexistent/nope > "$LOG_FILE" 2>&1
 if grep -i 'could not open' < "$LOG_FILE" > /dev/null 2>&1 ; then
@@ -79,10 +81,10 @@ if grep -i 'could not open' < "$LOG_FILE" > /dev/null 2>&1 ; then
 else
     printf "FAILED\n\n"
 
-    print_log_file $LOG_FILE
-    TESTS_FAILED=`echo $TESTS_FAILED + 1 | bc`
-    rm -f $LOG_FILE
+    print_log_file "$LOG_FILE"
+    TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
+    rm -f "$LOG_FILE"
 fi
 
-printf "\n$TESTS_FAILED tests failed.\n"
-exit $TESTS_FAILED
+printf "\n%s tests failed.\n" "$TESTS_FAILED"
+exit "$TESTS_FAILED"
