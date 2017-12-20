@@ -22,7 +22,7 @@ deploy:
 # name defaults to $tag
   provider: GitHub
   auth_token:
-    secure: kbdzwCstbX6rCfU2hWScnRt+3u6D/wwTQ8SLB7lBfxt2UyOB4NddptzWpqjpLVEt
+    secure: pme4eNEUXFcw6Buz6/14C+S5QHLy7GlJulahRnQUXLsG63WnSlVg7Hk2i119oTuV
   on:
     appveyor_repo_tag: true
   artifact: bitshuffle.exe
