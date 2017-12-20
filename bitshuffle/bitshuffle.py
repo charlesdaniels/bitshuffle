@@ -273,7 +273,7 @@ def find_editor():
     if 'EDITOR' in os.environ:
         return which(os.environ['EDITOR'])
 
-    selected_editor = os.path.join(os.environ['HOME'], '.selected_editor')
+    selected_editor = os.path.join(os.path.expanduser("~"), '.selected_editor')
     if os.path.isfile(selected_editor):
         # note: throws exception if selected_editor is unreadable
         with open(selected_editor) as f:
