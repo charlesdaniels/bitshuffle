@@ -13,3 +13,19 @@ build: off
 
 test_script:
     - ps: "scripts/test_win32_smoketest.ps1 -python_bin python"
+
+before_deploy:
+    - "%PYTHON%\\python.exe -m PyInstaller --onefile bitshuffle/bitshuffle.py -n bitshuffle.exe"
+
+deploy:
+# name defaults to $tag
+  provider: GitHub
+  auth_token:
+    secure: kbdzwCstbX6rCfU2hWScnRt+3u6D/wwTQ8SLB7lBfxt2UyOB4NddptzWpqjpLVEt
+  on:
+    appveyor_repo_tag: true
+  artifact: bitshuffle.exe
+
+artifacts:
+    - path: dist/bitshuffle.exe
+      name: bitshuffle.exe
