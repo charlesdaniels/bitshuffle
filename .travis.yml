@@ -40,15 +40,16 @@ before_deploy:
 - "pyinstaller --onefile bitshuffle/bitshuffle.py"
 
 deploy:
+- provider: releases
   on:
    tags: true
-  provider: releases
   api_key:
     secure: O6I+bNW8eaABty0yAiQQOajH6HmjhmVmF+g9sdr/8q5YnSW+lxfFJK+AP9mWLEK1WbJeoSHZhyUH8eLMjFi2t4QugKIV3BxKWgbhoWUJ+xTmlv21wUSaagGGxzsmL2PD1UUgkUsZ/F4ZLW4zvJ0HZ5i/usKT0QtrM35H7heq2m15W6O/q+2Ie6hO89vV/Uf1mC8wU+VbfDXgggqzQxWFFFUcx4QlMT59vvaPtA3dzdwbET1OxTTk/Ghnh9QOaSrFFNQmGGAAP77ze5DffedZxfpBzPBegWBySFiIVtHkwb9KER5hyIAd/Tzgl4kUYm3yte/Vpv2TI+SYFkPEV2MqwvWHJ+h9MHknCM3JyncEOX4Xl06EEmaJbADt2xLpQ8z0H6D7wmqKgmRJFdgZs/By7yHRJM6zP5BzGLqdq2O+4p2JRik1ibvSfeFt4kYGEp7shb7UekM475hCZK1pdcJAQOFgbSBB6ax1jszzGTd/5yTKGiXwtkS2++9rLWyZzs7avg5VhQaiLK3fl+4WoEZJJeBLpVu/zeHwJIThE306yrSoW2OU78Qwy6Xbpnb13BoiVBlS3M/hiKdkknQ/UEaQ4hICRX4a43zQL3H5zH3hx3TZNXIQduPcpDHTnkIHugPnrNzH4SK5evtT0i4k1ICbdhCU2uFaZ77fIFSeXX44xsA=
   file: dist/bitshuffle
   skip_cleanup: true
 # TODO: add Charles' key
 # - provider: pypi
-#     on:
-#       tags: true
+#   on:
+#     tags: true
+#     branch: master
 # run `travis encrypt --add deploy.password` to avoid making password public
