@@ -270,19 +270,27 @@ def main():
 def find_editor():
     if 'VISUAL' in os.environ:
         return which(os.environ['VISUAL'])
-    elif 'EDITOR' in os.environ:
+    if 'EDITOR' in os.environ:
         return which(os.environ['EDITOR'])
-    else:
-        for program in ['mimeopen', 'nano', 'vi', 'emacs',
-                        'micro', 'notepad', 'notepad++']:
-            editor = which(program)
-            if editor:
-                return editor
 
-        print("Could not find a suitable editor." +
-              "Please specify with '--editor'" +
-              "or set the EDITOR variable in your shell.")
-        sys.exit(1)
+    selected_editor = os.path.join(os.environ['HOME'], '.selected_editor')
+    if os.path.isfile(selected_editor):
+        # note: throws exception if selected_editor is unreadable
+        with open(selected_editor) as f:
+            f.readline()  # comment
+            editor = f.readline().split('=')[1].strip().replace('"', '')
+            return which(editor)  # does nothing if already absolute path
+
+    for program in ['mimeopen', 'nano', 'vi', 'emacs', 'notepad++', 'notepad',
+                    'micro', 'kate', 'gedit', 'kwrite']:
+        editor = which(program)
+        if editor:
+            return editor
+
+    print("Could not find a suitable editor." +
+          "Please specify with '--editor'" +
+          "or set the EDITOR variable in your shell.")
+    sys.exit(1)
 
 
 def decode(message):
