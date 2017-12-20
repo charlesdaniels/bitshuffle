@@ -16,6 +16,7 @@ test_script:
 
 before_deploy:
     - "%PYTHON%\\python.exe -m PyInstaller --onefile bitshuffle/bitshuffle.py -n bitshuffle.exe"
+    - "appveyor PushArtifact dist/bitshuffle.exe"
 
 deploy:
 # name defaults to $tag
@@ -25,7 +26,6 @@ deploy:
   on:
     appveyor_repo_tag: true
   artifact: bitshuffle.exe
-
-artifacts:
-    - path: dist/bitshuffle.exe
-      name: bitshuffle.exe
+  draft: true
+  prerelease: true
+  description: 'AppVeyor draft build'
