@@ -230,7 +230,8 @@ Most of BitShuffle's tests are end-to-end/blackbox tests that aim to validate
 real-world use cases. At this time, BitShuffle is too small and monolithic for
 actual unit tests to be of value. In the future, a stable public API will be
 defined, at which time comprehensive unit tests will need to be written to
-avoid regressions (see #39, #5).
+avoid regressions (see `#39 <https://github.com/charlesdaniels/bitshuffle/issues/39>`_,
+`#5 <https://github.com/charlesdaniels/bitshuffle/issues/5>`_).
 
 In addition to automated functionality tests, we also adhere strictly to PEP8,
 which is enforced by `pycodestyle`.
@@ -238,7 +239,7 @@ which is enforced by `pycodestyle`.
 Version Number Conventions
 --------------------------
 
-BitShuffle loosely follows [Semantic Versioning](https://semver.org). The
+BitShuffle loosely follows `Semantic Versioning <https://semver.org>`_. The
 following suffixes are used:
 
 * No suffix - implies this is a stable release.
