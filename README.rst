@@ -139,9 +139,14 @@ suggest symlinking to ``~/bin/bitshuffle``).
 Installing a Binary Release
 ---------------------------
 
-This is not possible yet, but in the future, there will be static builds of
-BitShuffle that can be run standalone.
-See also `#11 <https://github.com/charlesdaniels/bitshuffle/issues/11>`_.
+Binary releases for various platforms are available via the GitHub releases
+page. At present, builds are available for Linux an Windows as static
+binaries, which can be dropped anywhere in ``$PATH`` without requiring Python
+to be installed.
+
+macOS ships with Python installed in the default install, and the version
+available thus is sufficient to run BitShuffle. Consequentially, no static
+build is provided for macOS at this time.
 
 Contributing
 ============

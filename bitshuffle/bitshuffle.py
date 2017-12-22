@@ -190,7 +190,7 @@ def main():
     args = parser.parse_args()
 
     # Checks if no parameters were passed
-    if len(sys.argv[1:]) == 0:
+    if sys.argv[1:] == 0:
         parser.print_help()
         sys.exit(1)
 
@@ -251,7 +251,7 @@ def main():
         try:
             # python 3
             args.output.buffer.write(payload)
-        except Exception as e:
+        except AttributeError as e:
             # python 2
             args.output.write(payload)
 
