@@ -48,7 +48,7 @@ except NameError:
     file_type = io.IOBase
 
 
-version = '0.0.1-git'
+version = '0.0.1-RC1'
 
 stderr = sys.stderr
 stdout = sys.stdout
