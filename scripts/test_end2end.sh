@@ -100,14 +100,13 @@ all_tests () {
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --output "$TEMPFILE_DST"'
 
-
 }
 
-echo "Running tests..."
+echo "Running end-to-end tests..."
 
 TESTS_FAILED=0
 
 all_tests
 
-printf "\n%s tests failed\n" "$TESTS_FAILED"
+printf "%s tests failed\n\n" "$TESTS_FAILED"
 exit $TESTS_FAILED

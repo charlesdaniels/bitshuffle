@@ -46,8 +46,7 @@ expect_usage_error () {
         fi
 }
 
-printf "Running tests...\n\n"
-
+echo "Running argument tests..."
 printf "When run with no args, prints help... "
 expect_usage_error
 
@@ -86,5 +85,6 @@ else
     rm -f "$LOG_FILE"
 fi
 
-printf "\n%s tests failed.\n" "$TESTS_FAILED"
+echo "$TESTS_FAILED tests failed."
+echo
 exit "$TESTS_FAILED"
