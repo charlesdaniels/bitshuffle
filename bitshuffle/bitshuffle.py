@@ -258,6 +258,9 @@ def main():
         if is_tmp and tmpfile:
             os.remove(tmpfile)
 
+        args.input.close()
+        args.output.close()
+
         if checksum_ok:
             sys.exit(0)
         else:
