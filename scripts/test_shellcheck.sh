@@ -15,24 +15,26 @@ PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_ROOT="$PARENT_DIR/.."
 
 TOTAL=0
-RETCODE=0
 TEMPFILE="/tmp/$(uuidgen)"
+printf "Checking shellscripts... "
 # the grep -v '.git' prevents git's default hooks from causing ShellCheck
 # defects.
 find "$PROJECT_ROOT" -print | grep -v '.git' | while read -r line ; do
 	if file "$line" | grep -i 'shell script' > /dev/null 2>&1 ; then
-		echo "shellcheck for file '$line': "
 		shellcheck -s sh "$line"
 		RETCODE=$?
-		echo ""
-
-		# while loops are implemented as a subshell
-		TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
+		if [ "$RETCODE" -ne 0 ] ; then
+			TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
+		fi
 		echo "$TOTAL" > "$TEMPFILE"
 	fi
 done
 
 TOTAL="$(cat "$TEMPFILE")"
-echo "$TOTAL defective files"
+if [ "$TOTAL" -ne 0 ] ; then
+	printf "\n%s defective files\n" "$TOTAL"
+else
+	echo "PASSED"
+fi
 rm -f "$TEMPFILE"
 exit "$TOTAL"
