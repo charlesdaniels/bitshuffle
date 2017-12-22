@@ -110,9 +110,9 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
     packet_hash = hash(data)
     data = data.decode(encoding="ascii")
 
-    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}>>))"
+    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, file_hash, data)
+                        seqmax, file_hash, packet_hash, data)
     return packet
 
 
@@ -300,7 +300,7 @@ def find_editor():
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
-            seq_end, checksum, chunk = range(8)
+            seq_end, file_hash, packet_hash, chunk = range(9)
 
         try:
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
@@ -317,16 +317,18 @@ def decode(message):
         packets = [re.sub("|".join(string.whitespace), "", p)
                    for p in packets if p.strip() is not '']
 
+        num_chunks_wrong = 0
+
         segments = [None] * len(packets)  # ordered by index of packets
         # each chunk will be appended and original will be returned
         payload = bytes()
         for index, packet in enumerate(packets):
             try:
-                segments[index] = packet.split("|")
-                if segments[index][seq_num] != str(index):
+                packet = packet.split("|")
+                if packet[seq_num] != str(index):
                     stderr.write("WARNING: Sequence number " +
                                  "%s does not match actual order %d\n"
-                                 % (segments[index][seq_num], index))
+                                 % (packet[seq_num], index))
                     continue
             except IndexError:
                 stderr.write("WARNING: Packet " +
@@ -334,16 +336,34 @@ def decode(message):
                              (index))
                 continue
 
-            payload += base64.b64decode(segments[index][chunk])
+            if index == 0:
+                overall_hash = packet[file_hash]
+            elif packet[file_hash] != overall_hash:
+                    stderr.write("WARNING: File hash mismatch between packets "
+                                 + "0 and %d" % index)
 
-        if segments[0][compression] == "bz2":
+            hashed = hash(packet[chunk].encode(encoding='ascii'))
+            if hashed != packet[packet_hash]:
+                num_chunks_wrong += 1
+                stderr.write("WARNING: Given hash for packet "
+                             + "%d does not match actual hash '%s'\n"
+                             % (index, packet[packet_hash]))
+
+            payload += base64.b64decode(packet[chunk])
+
+        if packet[compression] == "bz2":
             payload = bz2.decompress(payload)
         else:
             payload = gzip_decompress(payload)
 
-        checksum_ok = verify(payload, segments[0][checksum])
-        payload = bytes(payload)
-        return payload, checksum_ok
+        file_hash_ok = (num_chunks_wrong == 0
+                        or hash(payload) == overall_hash)
+
+        if not file_hash_ok:
+            stderr.write("WARNING: Given hash '%s' " % packet[file_hash]
+                         + "for file does not match actual AND "
+                         + "one or more chunks have been corrupted.\n", )
+        return payload, file_hash_ok
 
 
 def infer_mode(args):
@@ -418,20 +438,6 @@ def set_defaults(args):
 
 def hash(data):
     return hashlib.sha1(data).hexdigest()
-
-
-def verify(data, given_hash):
-    """verify:
-    Ensure that hash of data and given hash match up.
-    Currently, only a warning is emmitted if they do not.
-    :param data: byte-like object
-    :param given_hash: string
-    """
-    if hash(data) != given_hash:
-        stderr.write("WARNING: Hashes do not match. Continuing, but you " +
-                     "may want to investigate.\n")
-        return False
-    return True
 
 
 def check_for_file(filename):
