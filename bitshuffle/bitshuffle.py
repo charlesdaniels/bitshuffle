@@ -382,7 +382,7 @@ def infer_mode(args):
 
     else:
         parser.print_help()
-        quit(1)
+        sys.exit(1)
 
     return args
 
