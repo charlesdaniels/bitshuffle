@@ -64,7 +64,8 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     chunks, which are strings.
 
     :param data: bytes
-    :param compresslevel: string: bz2 or gzip
+    :param compresstype: string: bz2 or gzip
+    :param compresslevel: int: 1-9 inclusive
     """
 
     if compresstype == 'bz2':
