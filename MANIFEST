@@ -1,0 +1,7 @@
+CONTRIBUTORS
+LICENSE
+README.rst
+setup.cfg
+setup.py
+bitshuffle/bitshuffle.py
+bitshuffle/__init__.py
