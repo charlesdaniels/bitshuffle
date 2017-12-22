@@ -190,7 +190,7 @@ def main():
     args = parser.parse_args()
 
     # Checks if no parameters were passed
-    if sys.argv[1:] == 0:
+    if not sys.argv[1:]:
         parser.print_help()
         sys.exit(1)
 
