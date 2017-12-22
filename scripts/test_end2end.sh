@@ -52,7 +52,7 @@ do_test () {
 		printf "\t%s does not match %s\n" "$TEMPFILE_SRC_SHA" "$TEMPFILE_DST_SHA"
 		echo
 		while read -r ln  ; do
-			printf "\t%n\n" "$ln"
+			printf "\t%s\n" "$ln"
 		done < "$LOG_FILE"
 		printf "\n\n"
 		TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
