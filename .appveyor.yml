@@ -13,3 +13,19 @@ build: off
 
 test_script:
     - ps: "scripts/test_win32_smoketest.ps1 -python_bin python"
+
+before_deploy:
+    - "%PYTHON%\\python.exe -m PyInstaller --onefile bitshuffle/bitshuffle.py -n bitshuffle.exe"
+    - "appveyor PushArtifact dist/bitshuffle.exe"
+
+deploy:
+# name defaults to $tag
+  provider: GitHub
+  auth_token:
+    secure: gT4SQ4p1SIpNOJp97ly7Qg70iN98OB337xPmIKC4Eg2QWCtDQCdX6ZHwhEKKWO7W
+  on:
+    appveyor_repo_tag: true
+  artifact: bitshuffle.exe
+  draft: true
+  prerelease: true
+  description: 'AppVeyor draft build'
