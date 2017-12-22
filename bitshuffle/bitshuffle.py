@@ -107,6 +107,7 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
         "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
+    packet_hash = hash(data)
     data = data.decode(encoding="ascii")
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}>>))"
@@ -129,7 +130,7 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
         data = fhandle.buffer.read()
     except AttributeError as e:
         data = fhandle.read()
-    file_hash = hashlib.sha1(data).hexdigest()
+    file_hash = hash(data)
     chunks = encode_data(data, chunksize, compresslevel, compresstype)
     seqmax = len(chunks) - 1
     seqnum = 0
@@ -415,6 +416,10 @@ def set_defaults(args):
     return args
 
 
+def hash(data):
+    return hashlib.sha1(data).hexdigest()
+
+
 def verify(data, given_hash):
     """verify:
     Ensure that hash of data and given hash match up.
@@ -422,7 +427,7 @@ def verify(data, given_hash):
     :param data: byte-like object
     :param given_hash: string
     """
-    if hashlib.sha1(data).hexdigest() != given_hash:
+    if hash(data) != given_hash:
         stderr.write("WARNING: Hashes do not match. Continuing, but you " +
                      "may want to investigate.\n")
         return False
