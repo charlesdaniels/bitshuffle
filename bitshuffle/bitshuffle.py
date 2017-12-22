@@ -311,15 +311,9 @@ def decode(message):
             print("Nothing to decode or nothing matched spec. Aborting.")
             sys.exit(2)
 
-        packets_nice = []
-        for p in packets:
-            p = p.strip()
-            if p is not '':
-                # delete unused whitespace and separators
-                p = re.sub("|".join(string.whitespace), "", p)
-                packets_nice.append(p)
-
-        packets = packets_nice
+        # delete unused whitespace and separators
+        packets = [re.sub("|".join(string.whitespace), "", p)
+                   for p in packets if p.strip() is not '']
 
         segments = [None] * len(packets)  # ordered by index of packets
         # each chunk will be appended and original will be returned
