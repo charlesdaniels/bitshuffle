@@ -140,7 +140,7 @@ Installing a Binary Release
 ---------------------------
 
 Binary releases for various platforms are available via the GitHub releases
-page. At present, builds are available for Linux an Windows as static
+page. At present, builds are available for Linux and Windows as static
 binaries, which can be dropped anywhere in ``$PATH`` without requiring Python
 to be installed.
 
