@@ -126,7 +126,7 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
     try:
         # Python 3
         data = fhandle.buffer.read()
-    except Exception as e:
+    except AttributeError as e:
         data = fhandle.read()
     checksum = hashlib.sha1(data).hexdigest()
     chunks = encode_data(data, chunksize, compresslevel, compresstype)
