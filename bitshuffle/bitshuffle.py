@@ -94,7 +94,7 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, checksum, seqnum, seqmax, compression):
+def encode_packet(data, file_hash, seqnum, seqmax, compression):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -111,7 +111,7 @@ def encode_packet(data, checksum, seqnum, seqmax, compression):
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, checksum, data)
+                        seqmax, file_hash, data)
     return packet
 
 
@@ -129,13 +129,13 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
         data = fhandle.buffer.read()
     except AttributeError as e:
         data = fhandle.read()
-    checksum = hashlib.sha1(data).hexdigest()
+    file_hash = hashlib.sha1(data).hexdigest()
     chunks = encode_data(data, chunksize, compresslevel, compresstype)
     seqmax = len(chunks) - 1
     seqnum = 0
     packets = []
     for c in chunks:
-        packets.append(encode_packet(c, checksum, seqnum,
+        packets.append(encode_packet(c, file_hash, seqnum,
                                      seqmax, compresstype))
         seqnum += 1
 
