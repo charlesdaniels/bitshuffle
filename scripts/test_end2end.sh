@@ -92,6 +92,32 @@ all_tests () {
     do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
+    printf "Unicode test... "
+    TEMPFILE_SRC="$(uuidgen)"
+    TEMPFILE_DST="$(uuidgen)"
+    LOG_FILE="$(uuidgen)"
+    echo '←↑→↓↔↕↖↗↘↜↛↠↢↮↹⇆⇏⇚⇼⇿∀∁∂∃∄∅∆∈∉∋∎∐∓∗√∦∯∿' > "$TEMPFILE_SRC"
+    TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
+    $BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
+    $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1
+	TEMPFILE_DST_SHA="$(shasum "$TEMPFILE_DST" 2>&1 | cut -d ' ' -f 1)"
+	if [ "$TEMPFILE_DST_SHA" = "$TEMPFILE_SRC_SHA" ] ; then
+		echo "PASSED"
+	else
+		printf "FAILED\n\n"
+
+		printf "\t%s does not match %s\n" "$TEMPFILE_SRC_SHA" "$TEMPFILE_DST_SHA"
+		echo
+		while read -r ln  ; do
+			printf "\t%s\n" "$ln"
+		done < "$LOG_FILE"
+		printf "\n\n"
+		TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
+    fi
+	rm -f "$LOG_FILE"
+	rm -f "$TEMPFILE_SRC"
+	rm -f "$TEMPFILE_DST"
+
     printf "Test infer encode from --input... "
     do_test '$BITSHUFFLE --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'

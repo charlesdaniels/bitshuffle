@@ -107,7 +107,7 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
         "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
-    data = data.decode(encoding="ascii")
+    data = data.decode()
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
