@@ -112,7 +112,7 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, file_hash, packet_hash, data)
+                        seqmax, packet_hash, data, file_hash)
     return packet
 
 
@@ -300,7 +300,7 @@ def find_editor():
 
 def decode(message):
         comment, compatibility, encoding, compression, seq_num, \
-            seq_end, file_hash, packet_hash, chunk = range(9)
+            seq_end, packet_hash, chunk, file_hash = range(9)
 
         try:
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
@@ -322,6 +322,7 @@ def decode(message):
         segments = [None] * len(packets)  # ordered by index of packets
         # each chunk will be appended and original will be returned
         payload = bytes()
+        overall_hash = None
         for index, packet in enumerate(packets):
             try:
                 packet = packet.split("|")
@@ -336,11 +337,12 @@ def decode(message):
                              (index))
                 continue
 
-            if index == 0:
-                overall_hash = packet[file_hash]
-            elif packet[file_hash] != overall_hash:
-                    stderr.write("WARNING: File hash mismatch between packets "
-                                 + "0 and %d" % index)
+            if len(packet) - 1 == file_hash:
+                if not overall_hash:
+                    overall_hash = packet[file_hash]
+                elif packet[file_hash] != overall_hash:
+                    stderr.write(
+                        "WARNING: File hash mismatch in packet" + index)
 
             hashed = hash(packet[chunk].encode(encoding='ascii'))
             if hashed != packet[packet_hash]:
@@ -357,12 +359,15 @@ def decode(message):
             payload = gzip_decompress(payload)
 
         file_hash_ok = (num_chunks_wrong == 0
-                        or hash(payload) == overall_hash)
+                        or (overall_hash and hash(payload) == overall_hash))
 
         if not file_hash_ok:
-            stderr.write("WARNING: Given hash '%s' " % packet[file_hash]
-                         + "for file does not match actual AND "
-                         + "one or more chunks have been corrupted.\n", )
+            if overall_hash:
+                stderr.write("WARNING: Given hash '%s' " % overall_hash
+                             + "for file does not match actual AND "
+                             + "one or more chunks corrupted")
+            else:
+                stderr.write("WARNING: one or more chunks corrupted.\n")
         return payload, file_hash_ok
 
 
