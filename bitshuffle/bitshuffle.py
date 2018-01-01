@@ -108,7 +108,7 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
     compatlevel = "1"
     encoding = "base64"
     packet_hash = hash(data)
-    data = data.decode(encoding="ascii")
+    data = data.decode()
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
@@ -401,12 +401,8 @@ def infer_mode(args):
     elif not args.output:
         args.encode = True
 
-    elif args.output and not stdin.isatty():
-        args.decode = True
-
     else:
-        parser.print_help()
-        sys.exit(1)
+        args.decode = True
 
     return args
 

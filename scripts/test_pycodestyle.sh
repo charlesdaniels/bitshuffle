@@ -16,20 +16,21 @@ PROJECT_ROOT="$PARENT_DIR/.."
 TOTAL=0
 RETCODE=0
 TEMPFILE="/tmp/$(uuidgen)"
+echo "Checking python codestyle... "
 find "$PROJECT_ROOT" -print | while read -r line ; do
 	if file "$line" | grep -i 'python script' > /dev/null 2>&1 ; then
-		echo "pycodestyle for file '$line': "
 		pycodestyle "$line"
 		RETCODE=$?
-		echo ""
-
-		# while loops are implemented as a subshell
 		TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
 		echo "$TOTAL" > "$TEMPFILE"
 	fi
 done
 
 TOTAL="$(cat "$TEMPFILE")"
-echo "$TOTAL total defects across all files"
+if [ "$TOTAL" -ne 0 ] ; then
+	echo "$TOTAL total defects across all files"
+else
+	echo "PASSED"
+fi
 rm -f "$TEMPFILE"
 exit "$TOTAL"
