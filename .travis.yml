@@ -24,6 +24,8 @@ script:
 - "./scripts/test_argument_options.sh"
 - "./scripts/test_pycodestyle.sh"
 - "./scripts/test_shellcheck.sh"
+- "./scripts/test_bad_hashes.sh"
+- "./scripts/test_travis_lint.sh"
 
 notifications:
   email:
