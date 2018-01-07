@@ -338,7 +338,7 @@ def decode(message):
                 continue
 
             if len(packet) - 1 == file_hash:
-                if not overall_hash:
+                if overall_hash is None:
                     overall_hash = packet[file_hash]
                 elif packet[file_hash] != overall_hash:
                     stderr.write(
@@ -359,10 +359,11 @@ def decode(message):
             payload = gzip_decompress(payload)
 
         file_hash_ok = (num_chunks_wrong == 0
-                        or (overall_hash and hash(payload) == overall_hash))
+                        or (overall_hash is not None
+                            and hash(payload) == overall_hash))
 
         if not file_hash_ok:
-            if overall_hash:
+            if overall_hash is not None:
                 stderr.write("WARNING: Given hash '%s' " % overall_hash
                              + "for file does not match actual AND "
                              + "one or more chunks corrupted")
