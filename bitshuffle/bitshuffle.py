@@ -59,6 +59,7 @@ compress = None
 debug = False
 verbose = False
 
+
 def encode_data(data, chunksize, compresslevel, compresstype):
     """encode_data
 
@@ -452,7 +453,6 @@ def warn(integer, severity=2, *argv):
     error = "%s %d: %s" % (levels[severity], integer, errors[integer])
     if argv:
         for arg in argv:
-            stderr.write(str(arg)) # TODO remove
             error += ": " + arg
     stderr.write(error + '\n')
 
@@ -463,7 +463,8 @@ def exitWithError(integer, severity=3, *argv):
 
 
 def exitSuccessfully():
-    if debug: warn(0, 0)
+    if debug:
+        warn(0, 0)
     sys.exit(0)
 
 
