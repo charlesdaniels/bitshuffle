@@ -21,6 +21,8 @@ import string
 import subprocess
 import tempfile
 
+from errors import *
+
 try:
     from shutil import which
 except ImportError:  # python2
@@ -54,7 +56,8 @@ stderr = sys.stderr
 stdout = sys.stdout
 stdin = sys.stdin
 compress = None
-
+debug = False
+verbose = False
 
 def encode_data(data, chunksize, compresslevel, compresstype):
     """encode_data
@@ -193,12 +196,15 @@ def main():
 
     # Checks if no parameters were passed
     if not sys.argv[1:]:
-        parser.print_help()
-        sys.exit(1)
+        if debug:
+            exitWithError(1, 0)
+        else:
+            parser.print_help()
+            sys.exit(1)
 
     elif args.version:
         print("Version: bitshuffle v{0}".format(version))
-        sys.exit(0)
+        exitSuccessfully()
 
     # Encode & Decode inference
     args = infer_mode(args)
@@ -440,6 +446,25 @@ def set_defaults(args):
 
 def hash(data):
     return hashlib.sha1(data).hexdigest()
+
+
+def warn(integer, severity=2, *argv):
+    error = "%s %d: %s" % (levels[severity], integer, errors[integer])
+    if argv:
+        for arg in argv:
+            stderr.write(str(arg)) # TODO remove
+            error += ": " + arg
+    stderr.write(error + '\n')
+
+
+def exitWithError(integer, severity=3, *argv):
+    warn(integer, severity, *argv)
+    sys.exit(integer)
+
+
+def exitSuccessfully():
+    if debug: warn(0, 0)
+    sys.exit(0)
 
 
 def check_for_file(filename):
