@@ -224,7 +224,7 @@ def main():
     if args.encode:
         if args.compresstype not in ['bz2', 'gzip']:
             parser.print_help()
-            sys.exit(1)
+            exitWithError(2, args.compresstype)
         else:
             packets = encode_file(args.input, args.chunksize,
                                   args.compresslevel, args.compresstype)
@@ -246,8 +246,7 @@ def main():
                 args.editor = find_editor()
 
             if not check_for_file(args.editor):
-                print("Editor %s not found" % args.editor)
-                sys.exit(4)
+                exitWithError(103, args.editor)
 
             if debug:
                 stderr.write("editor is %s\n" % args.editor)
@@ -303,10 +302,8 @@ def find_editor():
         if editor:
             return editor
 
-    print("Could not find a suitable editor." +
-          "Please specify with '--editor'" +
-          "or set the EDITOR variable in your shell.")
-    sys.exit(1)
+    exitWithError(102, "Please specify with '--editor' or set the EDITOR "
+                  + "variable in your shell.")
 
 
 def decode(message):
@@ -317,12 +314,10 @@ def decode(message):
             packets = re.findall('\(\(<<(.*)>>\)\)', message,
                                  flags=re.MULTILINE)
         except IndexError:
-            print("Invalid packet to decode. Aborting.")
-            sys.exit(2)
+            exitWithError(201)
 
         if len(packets) == 0:
-            print("Nothing to decode or nothing matched spec. Aborting.")
-            sys.exit(2)
+            exitWithError(202)
 
         # delete unused whitespace and separators
         packets = [re.sub("|".join(string.whitespace), "", p)
@@ -434,17 +429,13 @@ def set_defaults(args):
         try:
             args.input = open(args.input, 'rb')
         except IOError as e:
-            stderr.write("FATAL: could not open '{}'\n".format(args.input))
-            stderr.write("exception was: {}\n".format(e))
-            sys.exit(4)
+            exitWithError(104, args.input, str(e), severity=4)
 
     if not isinstance(args.output, file_type):
         try:
             args.output = open(args.output, 'wb')
         except IOError as e:
-            stderr.write("FATAL: could not open '{}'\n".format(args.output))
-            stderr.write("exception was: {}\n".format(e))
-            sys.exit(4)
+            exitWithError(105, args.output, str(e), severity=4)
 
     return args
 
