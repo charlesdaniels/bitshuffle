@@ -45,22 +45,19 @@ TESTS_FAILED=0
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Ignores missing file hash... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|4987450aeb4a67414aa0547d0f1e4bb3eae3dd86|QlpoNTFBWSZTWSgWZeAAAAbRgAAQQAAC45wAIAAiAAyEDQNB46s3DIBBbxdyRThQkCgWZeA=>>))")' \
-> "$LOG_FILE" 2>&1
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|1b84ae41263fed791c082f0ab57eaf9533a12ee270710769d35a2d5bedfb0caa|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|9816de5e568a59b808d4c220d605638d4b97bffe03ce08b59e448a18c66da17d>>))")' > /dev/null 2>"$LOG_FILE"
 expect_empty_file "$LOG_FILE"
 
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Ignores bad file hash if chunks are OK... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|4987450aeb4a67414aa0547d0f1e4bb3eae3dd86|QlpoNTFBWSZTWSgWZeAAAAbRgAAQQAAC45wAIAAiAAyEDQNB46s3DIBBbxdyRThQkCgWZeA=|bad file hash>>))")' \
-> "$LOG_FILE" 2>&1
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|1b84ae41263fed791c082f0ab57eaf9533a12ee270710769d35a2d5bedfb0caa|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|9816de5e568a59b808d4c220d605638d4b97bffe03ce08b59e448a18c66da17d>>))")' > /dev/null 2>"$LOG_FILE"
 expect_empty_file "$LOG_FILE"
 
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Warns of bad chunk hash... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWQxmjYsAAAlRgAAQQAAC55wAIAAiBqMmZQgGgCRGntZoXLR8Ep+LuSKcKEgGM0bFgA|075053ad253678f9f5c6f2dc662c967979e4ee67==>>))")' \
-> "$LOG_FILE" 2>&1
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad chunk hash |QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu>>))")' > /dev/null 2>"$LOG_FILE"
 if grep -i "WARNING 301" \
 	"$LOG_FILE" > /dev/null 2>&1; then
 	echo "PASSED"
@@ -75,8 +72,7 @@ fi
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Warns if both file and chunk hash bad... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWaeQs/cAAAPRgAAQQAAqCUSAIAAxADAgA2ogxC5DeLuSKcKEhTyFn7g=|bad file hash>>))")' \
-> "$LOG_FILE" 2>&1
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad chunk hash|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|bad file hash>>))")' > /dev/null 2>"$LOG_FILE"
 if grep -i 'WARNING 302' "$LOG_FILE" \
 	> /dev/null 2>&1; then
 	echo "PASSED"
@@ -90,8 +86,7 @@ fi
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Warns missing file hash with bad packet hash..."
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWaeQs/cAAAPRgAAQQAAqCUSAIAAxADAgA2ogxC5DeLuSKcKEhTyFn7g=>>))")' \
-> "$LOG_FILE" 2>&1
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWaeQs/cAAAPRgAAQQAAqCUSAIAAxADAgA2ogxC5DeLuSKcKEhTyFn7g=>>))")' > /dev/null 2>"$LOG_FILE"
 if grep -i 'WARNING 301' "$LOG_FILE" \
 	> /dev/null 2>&1; then
 	echo "PASSED"
