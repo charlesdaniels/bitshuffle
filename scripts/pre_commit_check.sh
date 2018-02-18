@@ -25,9 +25,11 @@ RET3=$?
 RET4=$?
 "$PARENT_DIR/test_shellcheck.sh"
 RET5=$?
+"$PARENT_DIR/test_bad_hashes.sh"
+RET6=$?
 
-TOTAL_FAILED=$(echo "$RET1 + $RET2 + $RET3 + $RET4 + $RET5" | bc)
-echo ""
+TOTAL_FAILED=$(echo "$RET1 + $RET2 + $RET3 + $RET4 + $RET5 + $RET6" | bc)
+echo
 # shellcheck disable=SC2039
 echo "- - - - -"
 echo "$TOTAL_FAILED total test failures"
