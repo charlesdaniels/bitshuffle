@@ -94,7 +94,7 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, file_hash, seqnum, seqmax, compression):
+def encode_packet(data, file_hash, seqnum, seqmax, compression, msg):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -103,8 +103,6 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
     :param data: bytes
     """
 
-    msg = "This is encoded with BitShuffle, which you can download " + \
-        "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
     data = data.decode()
@@ -115,7 +113,7 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
     return packet
 
 
-def encode_file(fhandle, chunksize, compresslevel, compresstype):
+def encode_file(fhandle, chunksize, compresslevel, compresstype, msg):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -136,16 +134,21 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
     packets = []
     for c in chunks:
         packets.append(encode_packet(c, file_hash, seqnum,
-                                     seqmax, compresstype))
+                                     seqmax, compresstype, msg))
         seqnum += 1
 
     return packets
 
 
 def main():
-    parser = argparse.ArgumentParser(description="A tool for encoding and " +
-                                     "decoding arbitrary binary data to " +
-                                     "ASCII text.")
+    # default message to include in every bitshuffle packet.
+    default_msg = "This is encoded with BitShuffle, which you can download" + \
+        " from https://github.com/charlesdaniels/bitshuffle "
+
+    descr = """A tool for encoding and decoding arbitrary binary data as
+ASCII text suitable for transmission over common communication protocols"""
+
+    parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument("--input", "-i",
                         help="Input file. Defaults to stdin. If the only " +
@@ -179,7 +182,6 @@ def main():
 
     parser.add_argument("--editor", "-E",
                         help="Editor to use for pasting packets. " +
-                        "If not specified, defaults in this order:\n" +
                         "\t$VISUAL, $EDITOR, mimeopen, nano, vi, " +
                         "emacs, micro, notepad, notepad++")
 
@@ -187,6 +189,10 @@ def main():
                         help="Type of compression to use. Defaults to bz2. " +
                              "Ignored if decoding packets. " +
                              "Currently supported: 'bz2', 'gzip'.")
+
+    parser.add_argument("--message", "-s", default=default_msg,
+                        help="Override message displayed in every packet." +
+                        " (default: " + default_msg + ")")
 
     args = parser.parse_args()
 
@@ -216,7 +222,8 @@ def main():
             sys.exit(1)
         else:
             packets = encode_file(args.input, args.chunksize,
-                                  args.compresslevel, args.compresstype)
+                                  args.compresslevel, args.compresstype,
+                                  args.message)
             for p in packets:
                 args.output.write(p)
                 args.output.write("\n\n")

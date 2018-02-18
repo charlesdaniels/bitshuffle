@@ -68,6 +68,9 @@ all_tests () {
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
+    printf "Basic encode/decode test (non-default message)... "
+    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --message foo | \
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
 
     printf "Basic encode/decode test (large chunk size)... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
