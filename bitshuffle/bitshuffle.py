@@ -21,10 +21,10 @@ import string
 import subprocess
 import tempfile
 
-try:
-    from .errors import *
-except ImportError:
+if __package__ is None or __package__ == '':
     from errors import *
+else:
+    from .errors import *
 
 try:
     from shutil import which
