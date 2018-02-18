@@ -174,7 +174,7 @@ ASCII text suitable for transmission over common communication protocols"""
     parser.add_argument("--chunksize", "-c", type=int,
                         help="Chunk size in bytes. Defaults to 2048.")
 
-    parser.add_argument("--compresslevel", '-m', type=int,
+    parser.add_argument("--compresslevel", '-l', type=int,
                         help="Compression level when encoding. " +
                         "1 is lowest, 9 is highest. Defaults to 5. " +
                         "Ignore if specified compresstype does not support" +
@@ -190,7 +190,7 @@ ASCII text suitable for transmission over common communication protocols"""
                              "Ignored if decoding packets. " +
                              "Currently supported: 'bz2', 'gzip'.")
 
-    parser.add_argument("--message", "-s", default=default_msg,
+    parser.add_argument("--message", "-m", default=default_msg,
                         help="Override message displayed in every packet." +
                         " (default: " + default_msg + ")")
 
