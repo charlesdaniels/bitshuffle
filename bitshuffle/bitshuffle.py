@@ -101,7 +101,7 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, file_hash, seqnum, seqmax, compression):
+def encode_packet(data, seqnum, seqmax, compression, file_hash=None):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -117,9 +117,13 @@ def encode_packet(data, file_hash, seqnum, seqmax, compression):
     packet_hash = hash(data)
     data = data.decode()
 
-    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}|{}>>))"
+    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}"
     packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, packet_hash, data, file_hash)
+                        seqmax, packet_hash, data)
+    if file_hash is not None:
+        packet += '|'
+        packet += file_hash
+    packet += '>>))'
     return packet
 
 
@@ -143,8 +147,11 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
     seqnum = 0
     packets = []
     for c in chunks:
-        packets.append(encode_packet(c, file_hash, seqnum,
-                                     seqmax, compresstype))
+        if seqnum == 0 or seqnum == seqmax:
+            packet = encode_packet(c, seqnum, seqmax, compresstype, file_hash)
+        else:
+            packet = encode_packet(c, seqnum, seqmax, compresstype)
+        packets.append(packet)
         seqnum += 1
 
     return packets
