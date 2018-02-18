@@ -146,7 +146,8 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype, msg):
     packets = []
     for c in chunks:
         if seqnum == 0 or seqnum == seqmax:
-            packet = encode_packet(c, seqnum, seqmax, compresstype, msg, file_hash)
+            packet = encode_packet(c, seqnum, seqmax, compresstype, msg,
+                                   file_hash)
         else:
             packet = encode_packet(c, seqnum, seqmax, compresstype, msg)
         packets.append(packet)
