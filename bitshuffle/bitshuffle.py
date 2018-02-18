@@ -23,7 +23,7 @@ import tempfile
 
 try:
     from .errors import *
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     from errors import *
 
 try:
