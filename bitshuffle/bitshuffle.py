@@ -21,7 +21,10 @@ import string
 import subprocess
 import tempfile
 
-from errors import *
+try:
+    from .errors import *
+except (ModuleNotFoundError, ImportError):
+    from errors import *
 
 try:
     from shutil import which
