@@ -440,16 +440,21 @@ def hash(data):
     return hashlib.sha1(data).hexdigest()
 
 
-def warn(integer, severity=2, *argv):
-    error = "%s %d: %s" % (levels[severity], integer, errors[integer])
+def warn(integer, *argv, **kwargs):
+    if 'severity' not in kwargs.keys():
+        kwargs['severity'] = 2
+    error = "%s %d: %s" % (levels[kwargs['severity']],
+                           integer, errors[integer])
     if argv:
         for arg in argv:
             error += ": " + arg
     stderr.write(error + '\n')
 
 
-def exitWithError(integer, severity=3, *argv):
-    warn(integer, severity, *argv)
+def exitWithError(integer, *argv, **kwargs):
+    if 'severity' not in kwargs.keys():
+        kwargs['severity'] = 3
+    warn(integer, *argv, severity=kwargs['severity'])
     sys.exit(integer)
 
 
