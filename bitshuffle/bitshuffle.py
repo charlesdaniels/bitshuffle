@@ -249,7 +249,8 @@ def main():
                 print("Editor %s not found" % args.editor)
                 sys.exit(4)
 
-            stderr.write("editor is %s\n" % args.editor)
+            if debug:
+                stderr.write("editor is %s\n" % args.editor)
 
             tmpfile = tempfile.mkstemp()[1]
             with open(tmpfile, 'w') as tf:
