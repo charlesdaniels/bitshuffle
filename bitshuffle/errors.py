@@ -20,6 +20,7 @@ errors = {
     202: "No packets given",
     203: "Invalid base64-encoded message",
     204: "Invalid compressed message",
+    205: "Packets given out of order",
 
     301: "Bad packet checksum",
     302: "Bad file checksum",
