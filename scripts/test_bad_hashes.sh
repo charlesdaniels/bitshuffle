@@ -61,7 +61,7 @@ printf "Warns of bad chunk hash... "
 python -c 'from bitshuffle import decode
 decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWQxmjYsAAAlRgAAQQAAC55wAIAAiBqMmZQgGgCRGntZoXLR8Ep+LuSKcKEgGM0bFgA|075053ad253678f9f5c6f2dc662c967979e4ee67==>>))")' \
 > "$LOG_FILE" 2>&1
-if grep -i "WARNING: Given hash for packet .* does not match actual" \
+if grep -i "WARNING 301" \
 	"$LOG_FILE" > /dev/null 2>&1; then
 	echo "PASSED"
 else
@@ -77,7 +77,7 @@ printf "Warns if both file and chunk hash bad... "
 python -c 'from bitshuffle import decode
 decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWaeQs/cAAAPRgAAQQAAqCUSAIAAxADAgA2ogxC5DeLuSKcKEhTyFn7g=|bad file hash>>))")' \
 > "$LOG_FILE" 2>&1
-if grep -i 'WARNING: Given hash .* for file does not match' "$LOG_FILE" \
+if grep -i 'WARNING 302' "$LOG_FILE" \
 	> /dev/null 2>&1; then
 	echo "PASSED"
 else
@@ -92,7 +92,7 @@ printf "Warns missing file hash with bad packet hash..."
 python -c 'from bitshuffle import decode
 decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle|1|base64|bz2|0|0|bad packet hash|QlpoNTFBWSZTWaeQs/cAAAPRgAAQQAAqCUSAIAAxADAgA2ogxC5DeLuSKcKEhTyFn7g=>>))")' \
 > "$LOG_FILE" 2>&1
-if grep -i 'WARNING: Given hash for packet [0-9]\+ does not match actual hash \S\+' "$LOG_FILE" \
+if grep -i 'WARNING 301' "$LOG_FILE" \
 	> /dev/null 2>&1; then
 	echo "PASSED"
 else

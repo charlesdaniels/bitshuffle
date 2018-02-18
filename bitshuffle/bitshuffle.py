@@ -274,9 +274,9 @@ def main():
         args.output.close()
 
         if checksum_ok:
-            sys.exit(0)
+            exitSuccessfully()
         else:
-            sys.exit(8)
+            exitWithError(302, severity=2)
 
     args.input.close()
     args.output.close()
@@ -333,29 +333,25 @@ def decode(message):
             try:
                 packet = packet.split("|")
                 if packet[seq_num] != str(index):
-                    stderr.write("WARNING: Sequence number " +
-                                 "%s does not match actual order %d\n"
-                                 % (packet[seq_num], index))
+                    warn(205, "Given number %d does not match actual %d"
+                         % (packet[seq_num], index), "Skipping")
                     continue
             except IndexError:
-                stderr.write("WARNING: Packet " +
-                             "%d is invalid for decoding.\n" %
-                             (index))
+                warn(201, "Packet %d is invalid for decoding." % index,
+                     "Skipping")
                 continue
 
             if len(packet) - 1 == file_hash:
                 if overall_hash is None:
                     overall_hash = packet[file_hash]
                 elif packet[file_hash] != overall_hash:
-                    stderr.write(
-                        "WARNING: File hash mismatch in packet" + index)
+                    warn(302, "Packet" + index)
 
             hashed = hash(packet[chunk].encode(encoding='ascii'))
             if hashed != packet[packet_hash]:
                 num_chunks_wrong += 1
-                stderr.write("WARNING: Given hash for packet "
-                             + "%d does not match actual hash '%s'\n"
-                             % (index, packet[packet_hash]))
+                warn(301, "Given hash for packet %d does not match actual '%s'"
+                          % (index, packet[packet_hash]))
 
             payload += base64.b64decode(packet[chunk])
 
@@ -370,11 +366,11 @@ def decode(message):
 
         if not file_hash_ok:
             if overall_hash is not None:
-                stderr.write("WARNING: Given hash '%s' " % overall_hash
-                             + "for file does not match actual AND "
-                             + "one or more chunks corrupted")
+                warn(302, "Given hash '%s' " % overall_hash
+                     + "for file does not match actual AND "
+                     + "one or more chunks corrupted")
             else:
-                stderr.write("WARNING: one or more chunks corrupted.\n")
+                warn(301, "One or more chunks corrupted.")
         return payload, file_hash_ok
 
 
