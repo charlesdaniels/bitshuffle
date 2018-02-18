@@ -200,10 +200,10 @@ def main():
 
     # Checks if no parameters were passed
     if not sys.argv[1:]:
+        parser.print_help()
         if debug:
             exitWithError(1, 0)
         else:
-            parser.print_help()
             sys.exit(1)
 
     elif args.version:
