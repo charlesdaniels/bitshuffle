@@ -182,6 +182,7 @@ ASCII text suitable for transmission over common communication protocols"""
 
     parser.add_argument("--editor", "-E",
                         help="Editor to use for pasting packets. " +
+                        "If not specified, defaults in this order:\n" +
                         "\t$VISUAL, $EDITOR, mimeopen, nano, vi, " +
                         "emacs, micro, notepad, notepad++")
 
