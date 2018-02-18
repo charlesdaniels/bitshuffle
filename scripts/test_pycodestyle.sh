@@ -22,6 +22,12 @@ find "$PROJECT_ROOT" -print | while read -r line ; do
 		pycodestyle "$line"
 		RETCODE=$?
 		TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
+
+		grep 'except\( Exception\)\?:' "$line"
+		RETCODE=$?
+		if [ "$RETCODE" -eq 0 ]; then
+			TOTAL="$(echo "$RETCODE + $TOTAL" | bc)"
+		fi
 		echo "$TOTAL" > "$TEMPFILE"
 	fi
 done

@@ -101,7 +101,7 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, seqnum, seqmax, compression, file_hash=None):
+def encode_packet(data, seqnum, seqmax, compression, msg, file_hash=None):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -110,8 +110,6 @@ def encode_packet(data, seqnum, seqmax, compression, file_hash=None):
     :param data: bytes
     """
 
-    msg = "This is encoded with BitShuffle, which you can download " + \
-        "from https://github.com/charlesdaniels/bitshuffle"
     compatlevel = "1"
     encoding = "base64"
     packet_hash = hash(data)
@@ -127,7 +125,7 @@ def encode_packet(data, seqnum, seqmax, compression, file_hash=None):
     return packet
 
 
-def encode_file(fhandle, chunksize, compresslevel, compresstype):
+def encode_file(fhandle, chunksize, compresslevel, compresstype, msg):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -148,19 +146,25 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype):
     packets = []
     for c in chunks:
         if seqnum == 0 or seqnum == seqmax:
-            packet = encode_packet(c, seqnum, seqmax, compresstype, file_hash)
+            packet = encode_packet(c, seqnum, seqmax, compresstype, msg, file_hash)
         else:
-            packet = encode_packet(c, seqnum, seqmax, compresstype)
+            packet = encode_packet(c, seqnum, seqmax, compresstype, msg)
         packets.append(packet)
+
         seqnum += 1
 
     return packets
 
 
 def main():
-    parser = argparse.ArgumentParser(description="A tool for encoding and " +
-                                     "decoding arbitrary binary data to " +
-                                     "ASCII text.")
+    # default message to include in every bitshuffle packet.
+    default_msg = "This is encoded with BitShuffle, which you can download" + \
+        " from https://github.com/charlesdaniels/bitshuffle "
+
+    descr = """A tool for encoding and decoding arbitrary binary data as
+ASCII text suitable for transmission over common communication protocols"""
+
+    parser = argparse.ArgumentParser(description=descr)
 
     parser.add_argument("--input", "-i",
                         help="Input file. Defaults to stdin. If the only " +
@@ -186,7 +190,7 @@ def main():
     parser.add_argument("--chunksize", "-c", type=int,
                         help="Chunk size in bytes. Defaults to 2048.")
 
-    parser.add_argument("--compresslevel", '-m', type=int,
+    parser.add_argument("--compresslevel", '-l', type=int,
                         help="Compression level when encoding. " +
                         "1 is lowest, 9 is highest. Defaults to 5. " +
                         "Ignore if specified compresstype does not support" +
@@ -202,6 +206,10 @@ def main():
                         help="Type of compression to use. Defaults to bz2. " +
                              "Ignored if decoding packets. " +
                              "Currently supported: 'bz2', 'gzip'.")
+
+    parser.add_argument("--message", "-m", default=default_msg,
+                        help="Override message displayed in every packet." +
+                        " (default: " + default_msg + ")")
 
     args = parser.parse_args()
 
@@ -234,7 +242,8 @@ def main():
             exitWithError(2, args.compresstype)
         else:
             packets = encode_file(args.input, args.chunksize,
-                                  args.compresslevel, args.compresstype)
+                                  args.compresslevel, args.compresstype,
+                                  args.message)
             for p in packets:
                 args.output.write(p)
                 args.output.write("\n\n")
