@@ -454,7 +454,7 @@ def set_defaults(args):
 
 
 def hash(data):
-    return hashlib.sha3_256(data).hexdigest()
+    return hashlib.sha256(data).hexdigest()
 
 
 def warn(integer, *argv, **kwargs):

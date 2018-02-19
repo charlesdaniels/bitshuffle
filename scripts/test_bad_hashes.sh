@@ -45,13 +45,13 @@ TESTS_FAILED=0
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Ignores missing file hash... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|1b84ae41263fed791c082f0ab57eaf9533a12ee270710769d35a2d5bedfb0caa|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|9816de5e568a59b808d4c220d605638d4b97bffe03ce08b59e448a18c66da17d>>))")' > /dev/null 2>"$LOG_FILE"
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|8adccec8526dab19929094dea125895597f2a4cf84f191c7c1a14656ceb0065a|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu>>))")' > /dev/null 2>"$LOG_FILE"
 expect_empty_file "$LOG_FILE"
 
 LOG_FILE="/tmp/$(uuidgen)"
 printf "Ignores bad file hash if chunks are OK... "
 python -c 'from bitshuffle import decode
-decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|1b84ae41263fed791c082f0ab57eaf9533a12ee270710769d35a2d5bedfb0caa|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|9816de5e568a59b808d4c220d605638d4b97bffe03ce08b59e448a18c66da17d>>))")' > /dev/null 2>"$LOG_FILE"
+decode("((<<This is encoded with BitShuffle, which you can download from https://github.com/charlesdaniels/bitshuffle |1|base64|bz2|0|0|8adccec8526dab19929094dea125895597f2a4cf84f191c7c1a14656ceb0065a|QlpoNTFBWSZTWTs44u4AAALRgAAQQAACYBQAIAAxDAEGT0LwgiUXckU4UJA7OOLu|bad file hash>>))")' > /dev/null 2>"$LOG_FILE"
 expect_empty_file "$LOG_FILE"
 
 LOG_FILE="/tmp/$(uuidgen)"
