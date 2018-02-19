@@ -49,16 +49,7 @@ do_test () {
 		exit 999
 	fi
 
-	INSTALL="$PYTHON_BIN ./setup.py install"
-    if ! [ -w /usr/local/bin ]; then INSTALL="sudo $INSTALL"; fi
-	if ! $INSTALL ; then
-		echo "FAIL: failed to install BitShuffle with Python '$PYTHON_BIN'"
-		exit 1
-	fi
-
-	cd /
-
-	if ! "$PYTHON_BIN" -m bitshuffle.bitshuffle --version ; then
+	if ! "$PYTHON_BIN" -m pip install . --version ; then
 		echo "FAIL: failed to execute BitShuffle with Python '$PYTHON_BIN'"
 		exit 2
 	fi
