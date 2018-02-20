@@ -3,9 +3,9 @@ python:
     - "2.7"
     - "3.6"
 
-# Sudo is required so that setup.py can be tested (TODO: investigate using
-# a virtualenv instead?)
-sudo: required
+# speed up builds
+sudo: false
+
 addons:
   apt:
     sources:
@@ -34,10 +34,10 @@ notifications:
 
 before_deploy:
 - "export MY_UID=$(id -u)"
-- "if ! [ -d dist ]; then sudo mkdir dist; fi"
-- "sudo chown -R $MY_UID dist"
-- "if ! [ -d build ]; then sudo mkdir build; fi"
-- "sudo chown -R $MY_UID build"
+- "if ! [ -d dist ]; then mkdir dist; fi"
+- "chown -R $MY_UID dist"
+- "if ! [ -d build ]; then mkdir build; fi"
+- "chown -R $MY_UID build"
 # makes a linux executable in dist/bitshuffle
 - "pyinstaller --onefile bitshuffle/bitshuffle.py"
 
