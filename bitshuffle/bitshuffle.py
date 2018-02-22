@@ -61,9 +61,13 @@ stdin = sys.stdin
 compress = None
 debug = False
 verbose = False
+compatlevel = "1"
 
+# default message to include in every bitshuffle packet.
+default_msg = "This is encoded with BitShuffle, which you can download" + \
+    " from https://github.com/charlesdaniels/bitshuffle "
 
-def encode_data(data, chunksize, compresslevel, compresstype):
+def encode_data(data, chunksize=2048, compresslevel=5, compresstype='bz2'):
     """encode_data
 
     Compress the given data (which should be bytes), chunk it into chunksize
@@ -101,7 +105,8 @@ def encode_data(data, chunksize, compresslevel, compresstype):
     return chunksfinal
 
 
-def encode_packet(data, seqnum, seqmax, compression, msg, file_hash=None):
+def encode_packet(data, seqnum, seqmax, compression='bz2', msg=default_msg,
+        file_hash=None):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -110,7 +115,6 @@ def encode_packet(data, seqnum, seqmax, compression, msg, file_hash=None):
     :param data: bytes
     """
 
-    compatlevel = "1"
     encoding = "base64"
     packet_hash = hash(data)
     data = data.decode()
@@ -125,7 +129,8 @@ def encode_packet(data, seqnum, seqmax, compression, msg, file_hash=None):
     return packet
 
 
-def encode_file(fhandle, chunksize, compresslevel, compresstype, msg):
+def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
+        compresstype='bz2', msg=default_msg):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -158,9 +163,6 @@ def encode_file(fhandle, chunksize, compresslevel, compresstype, msg):
 
 
 def main():
-    # default message to include in every bitshuffle packet.
-    default_msg = "This is encoded with BitShuffle, which you can download" + \
-        " from https://github.com/charlesdaniels/bitshuffle "
 
     descr = """A tool for encoding and decoding arbitrary binary data as
 ASCII text suitable for transmission over common communication protocols"""
