@@ -31,9 +31,9 @@ try:
 except ImportError:  # python2
     from distutils.spawn import find_executable as which
 
-try:
-    gzip_compress = gzip.compress
-    gzip_decompress = gzip.decompress
+try:  # does nothing if python3
+    gzip.compress
+    gzip.decompress
 except AttributeError:  # python2
     # taken straight from gzip.py
     def gzip_compress(data, compresslevel=5):
@@ -46,6 +46,10 @@ except AttributeError:  # python2
     def gzip_decompress(data):
         with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
             return f.read()
+
+    gzip.compress = gzip_compress
+    gzip.decompress = gzip_decompress
+    del gzip_compress, gzip_decompress
 
 try:
     file_type = file
@@ -67,7 +71,8 @@ compatlevel = "1"
 default_msg = "This is encoded with BitShuffle, which you can download" + \
     " from https://github.com/charlesdaniels/bitshuffle "
 
-def encode_data(data, chunksize=2048, compresslevel=5, compresstype='bz2'):
+
+def encode_data(data, chunksize=2048, compresslevel=5, compress=bz2.compress):
     """encode_data
 
     Compress the given data (which should be bytes), chunk it into chunksize
@@ -79,11 +84,7 @@ def encode_data(data, chunksize=2048, compresslevel=5, compresstype='bz2'):
     :param compresslevel: int: 1-9 inclusive
     """
 
-    if compresstype == 'bz2':
-        data = bz2.compress(data, compresslevel=compresslevel)
-    else:
-        data = gzip_compress(data, compresslevel=compresslevel)
-
+    data = compress(data, compresslevel=compresslevel)
     chunks = []
     chunkptr = 0
     while True:
@@ -105,8 +106,8 @@ def encode_data(data, chunksize=2048, compresslevel=5, compresstype='bz2'):
     return chunksfinal
 
 
-def encode_packet(data, seqnum, seqmax, compression='bz2', msg=default_msg,
-        file_hash=None):
+def encode_packet(data, seqnum, seqmax, compress=bz2.compress, msg=default_msg,
+                  file_hash=None):
     """encode_packet
 
     Take an already encoded data string and encode it to a BitShuffle data
@@ -120,8 +121,8 @@ def encode_packet(data, seqnum, seqmax, compression='bz2', msg=default_msg,
     data = data.decode()
 
     fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}"
-    packet = fmt.format(msg, compatlevel, encoding, compression, seqnum,
-                        seqmax, packet_hash, data)
+    packet = fmt.format(msg, compatlevel, encoding, compress.__module__,
+                        seqnum, seqmax, packet_hash, data)
     if file_hash is not None:
         packet += '|'
         packet += file_hash
@@ -130,7 +131,7 @@ def encode_packet(data, seqnum, seqmax, compression='bz2', msg=default_msg,
 
 
 def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
-        compresstype='bz2', msg=default_msg):
+                compress=bz2.compress, msg=default_msg):
     """encode_file
 
     Encode the file from fhandle and return a list of strings containing
@@ -145,16 +146,16 @@ def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
     except AttributeError as e:
         data = fhandle.read()
     file_hash = hash(data)
-    chunks = encode_data(data, chunksize, compresslevel, compresstype)
+    chunks = encode_data(data, chunksize, compresslevel, compress)
     seqmax = len(chunks) - 1
     seqnum = 0
     packets = []
     for c in chunks:
         if seqnum == 0 or seqnum == seqmax:
-            packet = encode_packet(c, seqnum, seqmax, compresstype, msg,
+            packet = encode_packet(c, seqnum, seqmax, compress, msg,
                                    file_hash)
         else:
-            packet = encode_packet(c, seqnum, seqmax, compresstype, msg)
+            packet = encode_packet(c, seqnum, seqmax, compress, msg)
         packets.append(packet)
 
         seqnum += 1
@@ -243,15 +244,19 @@ ASCII text suitable for transmission over common communication protocols"""
         if args.compresstype not in ['bz2', 'gzip']:
             parser.print_help()
             exitWithError(2, args.compresstype)
+        elif args.compresstype == 'bz2':
+            compress = bz2.compress
         else:
-            packets = encode_file(args.input, args.chunksize,
-                                  args.compresslevel, args.compresstype,
-                                  args.message)
-            for p in packets:
-                args.output.write(p)
-                args.output.write("\n\n")
+            compress = gzip.compress
 
-            args.output.flush()
+        packets = encode_file(args.input, args.chunksize,
+                              args.compresslevel, compress,
+                              args.message)
+        for p in packets:
+            args.output.write(p)
+            args.output.write("\n\n")
+
+        args.output.flush()
 
     elif args.decode:
 
@@ -377,7 +382,7 @@ def decode(message):
         if packet[compression] == "bz2":
             payload = bz2.decompress(payload)
         else:
-            payload = gzip_decompress(payload)
+            payload = gzip.decompress(payload)
 
         file_hash_ok = (num_chunks_wrong == 0
                         or (overall_hash is not None
