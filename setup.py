@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from bitshuffle.bitshuffle import version
+from bitshuffle.bitshuffle import VERSION
 from setuptools import setup
 from setuptools import find_packages
 
@@ -32,7 +32,7 @@ classifiers = [
     ]
 
 setup(name="bitshuffle",
-      version=version,
+      version=VERSION,
       description=short_description,
       long_description=long_description,
       author="Charles Daniels",
