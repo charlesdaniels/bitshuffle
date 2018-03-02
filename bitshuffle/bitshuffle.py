@@ -5,6 +5,8 @@ BitShuffle command-line client. Supports encoding & decoding.
 Run with --help for usage information.
 '''
 
+from __future__ import division, generators, print_function, absolute_import
+
 import os
 import io
 import sys
@@ -22,14 +24,17 @@ from sys import stderr, stdout, stdin
 
 
 try:
-    assert ModuleNotFoundError
-except NameError:  # python2
-    # pylint: disable=redefined-builtin
-    ModuleNotFoundError = ValueError
-try:
-    from .errors import ERRORS, LEVELS
-except (ModuleNotFoundError, ImportError):
-    from errors import ERRORS, LEVELS
+    assert ERRORS
+except NameError:
+    try:
+        from errors import ERRORS, LEVELS
+    except ImportError:
+        from . import errors
+        ERRORS = errors.ERRORS
+        LEVELS = errors.LEVELS
+        del errors
+finally:
+    assert ERRORS
 
 try:
     from shutil import which
