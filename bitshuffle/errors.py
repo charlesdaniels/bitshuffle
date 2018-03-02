@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-levels = ["DEBUG", "VERBOSE", "WARNING", "ERROR", "FATAL"]
+'''Porcelain errors codes for bitshuffle'''
 
-errors = {
+LEVELS = ["DEBUG", "VERBOSE", "WARNING", "ERROR", "FATAL"]
+
+ERRORS = {
     0: "Success",
     1: "No arguments given",
     2: "Bad compression type",
