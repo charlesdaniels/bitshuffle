@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 
-# pylint: disable=missing-docstring
-
-# .SHELLDOC
-#
-# BitShuffle command-line client. Supports encoding & decoding.
-#
-# Run with --help for usage information.
-#
-# .ENDOC
+'''
+BitShuffle command-line client. Supports encoding & decoding.
+Run with --help for usage information.
+'''
 
 import os
 import io
