@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# pylint: disable=missing-docstring
+
 # .SHELLDOC
 #
 # BitShuffle command-line client. Supports encoding & decoding.
@@ -20,6 +22,7 @@ import re
 import string
 import subprocess
 from tempfile import mkstemp
+# pylint: disable=ungrouped-imports
 from sys import stderr, stdout, stdin
 
 
@@ -43,7 +46,9 @@ try:  # does nothing if python3
     assert gzip.decompress
 except AttributeError:  # python2
     # taken straight from gzip.py
+    # pylint: disable=invalid-name
     def gzip_compress(data, compresslevel=5):
+        # pylint: disable=missing-docstring
         buf = io.BytesIO()
         c = compresslevel
         with gzip.GzipFile(fileobj=buf, mode='wb', compresslevel=c) as f:
@@ -51,6 +56,7 @@ except AttributeError:  # python2
         return buf.getvalue()
 
     def gzip_decompress(data):
+        # pylint: disable=missing-docstring
         with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
             return f.read()
 
@@ -61,6 +67,7 @@ except AttributeError:  # python2
 try:
     assert file
 except NameError:
+    # pylint: disable=invalid-name
     file = io.IOBase
 
 
@@ -299,6 +306,7 @@ ASCII text suitable for transmission over common communication protocols"""
     args.output.close()
 
 
+# pylint: disable=inconsistent-return-statements
 def find_editor():
     '''Attempt to find a suitable editor for decoding packets
     Extremely system-dependent.'''
@@ -374,6 +382,7 @@ def decode(message):
                  % (index, packet[packet_hash]))
 
         payload += base64.b64decode(packet[chunk])
+    # pylint: disable=undefined-loop-variable
     payload = (bz2.decompress(payload) if packet[compression] == "bz2"
                else gzip.decompress(payload))
 
@@ -410,6 +419,7 @@ def infer_mode(args):
         args.decode = True
 
     elif args.input:
+        # pylint: disable=simplifiable-if-statement
         if args.output:
             args.decode = True
         else:
