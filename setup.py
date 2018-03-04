@@ -40,10 +40,10 @@ setup(name="bitshuffle",
       url="https://github.com/charlesdaniels/bitshuffle",
       license='BSD',
       classifiers=classifiers,
-      keywords='checksum hash internet transmit file',
+      keywords='checksum hash internet transmit file compression gzip bzip2',
       packages=find_packages(exclude=['smoketest']),
       entry_points={'console_scripts':
-                    ['bitshuffle=bitshuffle.bitshuffle:main']},
+                    ['bitshuffle=bitshuffle:main']},
       package_dir={'bitshuffle': 'bitshuffle'},
       platforms=['POSIX']
       )
