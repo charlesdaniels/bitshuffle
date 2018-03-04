@@ -16,7 +16,7 @@ from tempfile import mkstemp
 from sys import stdin, stdout, stderr, argv
 
 from bitshuffle import VERSION, decode, encode
-from .library import (gzip, DEFAULT_MSG, DEBUG,
+from .library import (gzip, DEFAULT_MSG,
                       exit_successfully, exit_with_error)
 
 try:
@@ -48,7 +48,7 @@ def create_parser():
                         help="Generate a BitShuffle data packet from" +
                         "the input file and write it to the output.")
 
-    parser.add_argument("--decode", "-d", "-D", action="store_true",
+    parser.add_argument("--decode", "-d", action="store_true",
                         help="Extract BitShuffle data packet(s) from the " +
                         "the input file, and write the decoded file to the " +
                         "output file.")
@@ -79,6 +79,9 @@ def create_parser():
     parser.add_argument("--message", "-m", default=DEFAULT_MSG,
                         help="Override message displayed in every packet." +
                         " (default: " + DEFAULT_MSG + ")")
+    parser.add_argument("--debug", '-D', default=False, dest='DEBUG',
+                        action='store_true',
+                        help="Be very verbose (default: false)")
     return parser
 
 
@@ -93,7 +96,7 @@ ASCII text suitable for transmission over common communication protocols"""
     # Checks if no parameters were passed
     if not argv[1:]:
         parser.print_help()
-        if DEBUG:
+        if args.DEBUG:
             exit_with_error(1, 0)
         else:
             exit_successfully()
@@ -146,7 +149,7 @@ ASCII text suitable for transmission over common communication protocols"""
             if not check_for_file(args.editor):
                 exit_with_error(103, args.editor)
 
-            if DEBUG:
+            if args.DEBUG:
                 stderr.write("editor is %s\n" % args.editor)
 
             tmpfile = mkstemp()[1]

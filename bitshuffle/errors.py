@@ -2,8 +2,6 @@
 
 '''Porcelain errors codes for bitshuffle'''
 
-LEVELS = ["DEBUG", "VERBOSE", "WARNING", "ERROR", "FATAL"]
-
 ERRORS = {
     0: "Success",
     1: "No arguments given",

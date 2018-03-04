@@ -7,9 +7,10 @@ import bz2
 import gzip
 import string
 import base64
+import logging
 from hashlib import sha256
-from sys import stderr, stdin, exit as exit_with_code
-from .errors import LEVELS, ERRORS
+from sys import exit as exit_with_code
+from .errors import ERRORS
 
 VERSION = '0.0.1-git'
 DEBUG = False
@@ -43,34 +44,39 @@ except AttributeError:  # python2
     del gzip_compress, gzip_decompress
 
 
-def warn(integer, *argv, **kwargs):
-    '''Issue a warning to stderr for every argument given
-    Prepends colon to every successive argument
-    kwargs are ignored except for severity'''
-    if 'severity' not in kwargs.keys():
-        kwargs['severity'] = 2
-    error = "%s %d: %s" % (LEVELS[kwargs['severity']],
-                           integer, ERRORS[integer])
+# By default, format is '%(levelname)s:%(name)s:%(message)s',
+logging.basicConfig(format='%(name)s: %(levelname)s: %(message)s',
+                    level=(logging.DEBUG if DEBUG else logging.WARN))
+
+# idiomatic way is __name__, but logger is also called from main
+LOG = logging.getLogger('bitshuffle')
+
+
+def log_fmt(integer, *argv):
+    '''
+    int -> str
+    Format a string for use with `LOG.ger`.
+    Integer is the error code to show.
+    Prepends colon to every successive argument given
+    '''
+    error = "%d: %s" % (integer, ERRORS[integer])
     for arg in argv:
         error += ": " + arg
-    stderr.write(error + '\n')
+    return error
 
 
 def exit_with_error(integer, *argv, **kwargs):
     '''Issue a warning and exit with return code `integer`.
-    Each successive argument is added to the warning, prepended by a colon.
-    kwargs are ignored, excluding severity'''
+    Each successive argument is added to the warning, prepended by a colon.'''
     if 'severity' not in kwargs.keys():
         kwargs['severity'] = 3
-    warn(integer, *argv, severity=kwargs['severity'])
+    LOG.log(kwargs['severity'] * 10, log_fmt(integer, *argv))
     exit_with_code(integer)
 
 
 def exit_successfully():
     '''exit, successfully'''
-    if DEBUG:
-        warn(0, 0)
-    exit_with_code(0)
+    exit_with_error(0, severity=0)
 
 
 def shasum(data):
@@ -131,7 +137,7 @@ def encode_packet(data, seqnum, seqmax, compress=bz2.compress, msg=DEFAULT_MSG,
     return packet
 
 
-def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
+def encode_file(fhandle, chunksize=2048, compresslevel=5,
                 compress=bz2.compress, msg=DEFAULT_MSG):
     """encode_file
 
@@ -192,25 +198,29 @@ def decode(message):
         try:
             packet = packet.split("|")
             if packet[seq_num] != str(index):
-                warn(205, "Given number %d does not match actual %d"
-                     % (packet[seq_num], index), "Skipping")
+                LOG.warning(log_fmt(205,
+                                    "Given number %d does not match actual %d"
+                                    % (packet[seq_num], index), "Skipping"))
                 continue
         except IndexError:
-            warn(201, "Packet %d is invalid for decoding." % index,
-                 "Skipping")
+            LOG.warning(log_fmt(201,
+                                "Packet %d is invalid for decoding." % index,
+                                "Skipping"))
             continue
 
         if len(packet) - 1 == file_hash:
             if overall_hash is None:
                 overall_hash = packet[file_hash]
             elif packet[file_hash] != overall_hash:
-                warn(302, "Packet" + index)
+                LOG.warning(log_fmt(302, "Packet" + index))
 
         hashed = shasum(packet[chunk].encode(encoding='ascii'))
         if hashed != packet[packet_hash]:
             num_chunks_wrong += 1
-            warn(301, "Given hash for packet %d does not match actual '%s'"
-                 % (index, packet[packet_hash]))
+            LOG.warning(log_fmt(301,
+                                ("Given hash for packet %d does not "
+                                 + "match actual '%s'")
+                                % (index, packet[packet_hash])))
 
         payload += base64.b64decode(packet[chunk])
     # pylint: disable=undefined-loop-variable
@@ -223,9 +233,10 @@ def decode(message):
 
     if not file_hash_ok:
         if overall_hash is not None:
-            warn(302, "Given hash '%s' " % overall_hash
-                 + "for file does not match actual AND "
-                 + "one or more chunks corrupted")
+            LOG.warning(
+                log_fmt(302, "Given hash '%s' " % overall_hash
+                        + "for file does not match actual AND "
+                        + "one or more chunks corrupted"))
         else:
-            warn(301, "One or more chunks corrupted.")
+            LOG.warning(log_fmt(301, "One or more chunks corrupted."))
     return payload, file_hash_ok
