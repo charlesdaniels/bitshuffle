@@ -10,10 +10,12 @@
 # shellcheck disable=SC1090
 . "$(dirname "$0")/realpath.sh"
 TEST_DIR="$(realpath_sh "$(dirname "$0")")"
-BITSHUFFLE="$TEST_DIR/../bitshuffle/bitshuffle.py"
+BITSHUFFLE="$TEST_DIR/../wrapper.py"
 TESTS_FAILED=0
 
 if [ ! -x "$BITSHUFFLE" ] ; then
+        ls "$TEST_DIR/.."
+        file "$BITSHUFFLE"
         echo "FATAL: '$BITSHUFFLE' does not exist"
         exit 9999
 fi

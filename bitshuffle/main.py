@@ -9,60 +9,20 @@ from __future__ import division, generators, print_function, absolute_import
 
 import os
 import io
-import sys
 import argparse
-import base64
 import bz2
-import gzip
-import hashlib
-import re
-import string
 import subprocess
 from tempfile import mkstemp
-# pylint: disable=ungrouped-imports
-from sys import stderr, stdout, stdin
+from sys import stdin, stdout, stderr, argv
 
-
-try:
-    assert ERRORS
-except NameError:
-    try:
-        from errors import ERRORS, LEVELS
-    except ImportError:
-        from . import errors
-        ERRORS = errors.ERRORS
-        LEVELS = errors.LEVELS
-        del errors
-finally:
-    assert ERRORS
+from bitshuffle import VERSION, decode, encode
+from .library import (gzip, DEFAULT_MSG, DEBUG,
+                      exit_successfully, exit_with_error)
 
 try:
     from shutil import which
 except ImportError:  # python2
     from distutils.spawn import find_executable as which
-
-try:  # does nothing if python3
-    assert gzip.compress
-    assert gzip.decompress
-except AttributeError:  # python2
-    # taken straight from gzip.py
-    # pylint: disable=invalid-name
-    def gzip_compress(data, compresslevel=5):
-        # pylint: disable=missing-docstring
-        buf = io.BytesIO()
-        c = compresslevel
-        with gzip.GzipFile(fileobj=buf, mode='wb', compresslevel=c) as f:
-            f.write(data)
-        return buf.getvalue()
-
-    def gzip_decompress(data):
-        # pylint: disable=missing-docstring
-        with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
-            return f.read()
-
-    gzip.compress = gzip_compress
-    gzip.decompress = gzip_decompress
-    del gzip_compress, gzip_decompress
 
 try:
     assert file
@@ -71,104 +31,8 @@ except NameError:
     file = io.IOBase
 
 
-VERSION = '0.0.1-git'
-DEBUG = False
-COMPATLEVEL = "1"
-DEFAULT_MSG = "This is encoded with BitShuffle, which you can download" + \
-    " from https://github.com/charlesdaniels/bitshuffle "
-
-
-def encode_data(data, chunksize=2048, compresslevel=5, compress=bz2.compress):
-    """encode_data
-
-    Compress the given data (which should be bytes), chunk it into chunksize
-    sized chunks, base64 encode the chunks, and return the lot as a list of
-    chunks, which are strings.
-
-    :param data: bytes
-    :param compresstype: string: bz2 or gzip
-    :param compresslevel: int: 1-9 inclusive
-    """
-
-    data = compress(data, compresslevel=compresslevel)
-    chunks = []
-    chunkptr = 0
-    while True:
-        chunk = data[chunkptr:chunkptr + chunksize]
-        chunkptr += chunksize
-
-        chunks.append(base64.b64encode(chunk))
-
-        if chunkptr >= len(data):
-            chunk = data[chunkptr:]
-            chunks.append(base64.b64encode(chunk))
-            break
-
-    return [chunk for chunk in chunks if len(chunk) > 0]
-
-
-def encode_packet(data, seqnum, seqmax, compress=bz2.compress, msg=DEFAULT_MSG,
-                  file_hash=None):
-    """encode_packet
-
-    Take an already encoded data string and encode it to a BitShuffle data
-    packet.
-
-    :param data: bytes
-    """
-
-    encoding = "base64"
-    packet_hash = shashum(data)
-    data = data.decode()
-
-    fmt = "((<<{}|{}|{}|{}|{}|{}|{}|{}"
-    packet = fmt.format(msg, COMPATLEVEL, encoding, compress.__module__,
-                        seqnum, seqmax, packet_hash, data)
-    if file_hash is not None:
-        packet += '|'
-        packet += file_hash
-    packet += '>>))'
-    return packet
-
-
-def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
-                compress=bz2.compress, msg=DEFAULT_MSG):
-    """encode_file
-
-    Encode the file from fhandle and return a list of strings containing
-    BitShuffle data packets.
-
-    :param fhandle:
-    """
-
-    try:
-        # Python 3
-        data = fhandle.buffer.read()
-    except AttributeError:
-        data = fhandle.read()
-    file_hash = shashum(data)
-    chunks = encode_data(data, chunksize, compresslevel, compress)
-    seqmax = len(chunks) - 1
-    seqnum = 0
-    packets = []
-    for chunk in chunks:
-        if seqnum == 0 or seqnum == seqmax:
-            packet = encode_packet(chunk, seqnum, seqmax, compress, msg,
-                                   file_hash)
-        else:
-            packet = encode_packet(chunk, seqnum, seqmax, compress, msg)
-        packets.append(packet)
-
-        seqnum += 1
-
-    return packets
-
-
-def main():
-
-    """A tool for encoding and decoding arbitrary binary data as
-ASCII text suitable for transmission over common communication protocols"""
-
+def create_parser():
+    '''Argument options for CLI tool'''
     parser = argparse.ArgumentParser(description=main.__doc__)
 
     parser.add_argument("--input", "-i",
@@ -215,16 +79,24 @@ ASCII text suitable for transmission over common communication protocols"""
     parser.add_argument("--message", "-m", default=DEFAULT_MSG,
                         help="Override message displayed in every packet." +
                         " (default: " + DEFAULT_MSG + ")")
+    return parser
 
+
+def main():
+
+    """A tool for encoding and decoding arbitrary binary data as
+ASCII text suitable for transmission over common communication protocols"""
+
+    parser = create_parser()
     args = parser.parse_args()
 
     # Checks if no parameters were passed
-    if not sys.argv[1:]:
+    if not argv[1:]:
         parser.print_help()
         if DEBUG:
             exit_with_error(1, 0)
         else:
-            sys.exit(1)
+            exit_successfully()
 
     elif args.version:
         print("Version: bitshuffle v{0}".format(VERSION))
@@ -250,9 +122,8 @@ ASCII text suitable for transmission over common communication protocols"""
         else:
             compress = gzip.compress
 
-        packets = encode_file(args.input, args.chunksize,
-                              args.compresslevel, compress,
-                              args.message)
+        packets = encode(args.input, args.chunksize, args.compresslevel,
+                         compress, args.message)
         for packet in packets:
             args.output.write(packet)
             args.output.write("\n\n")
@@ -333,73 +204,6 @@ def find_editor():
                     + "variable in your shell.")
 
 
-def decode(message):
-    '''Decode any number of packets previously encoded with bitshuffle
-    Assumes all packets are part of the same message'''
-    _, _, _, compression, seq_num, \
-        _, packet_hash, chunk, file_hash = range(9)
-
-    try:
-        packets = re.findall(r'\(\(<<(.*)>>\)\)', message,
-                             flags=re.MULTILINE)
-    except IndexError:
-        exit_with_error(201)
-
-    if not packets:
-        exit_with_error(202)
-
-    # delete unused whitespace and separators
-    packets = [re.sub("|".join(string.whitespace), "", p)
-               for p in packets if p.strip() != '']
-
-    num_chunks_wrong = 0
-
-    # each chunk will be appended and original will be returned
-    payload = bytes()
-    overall_hash = None
-    for index, packet in enumerate(packets):
-        try:
-            packet = packet.split("|")
-            if packet[seq_num] != str(index):
-                warn(205, "Given number %d does not match actual %d"
-                     % (packet[seq_num], index), "Skipping")
-                continue
-        except IndexError:
-            warn(201, "Packet %d is invalid for decoding." % index,
-                 "Skipping")
-            continue
-
-        if len(packet) - 1 == file_hash:
-            if overall_hash is None:
-                overall_hash = packet[file_hash]
-            elif packet[file_hash] != overall_hash:
-                warn(302, "Packet" + index)
-
-        hashed = shashum(packet[chunk].encode(encoding='ascii'))
-        if hashed != packet[packet_hash]:
-            num_chunks_wrong += 1
-            warn(301, "Given hash for packet %d does not match actual '%s'"
-                 % (index, packet[packet_hash]))
-
-        payload += base64.b64decode(packet[chunk])
-    # pylint: disable=undefined-loop-variable
-    payload = (bz2.decompress(payload) if packet[compression] == "bz2"
-               else gzip.decompress(payload))
-
-    file_hash_ok = (num_chunks_wrong == 0
-                    or (overall_hash is not None
-                        and shashum(payload) == overall_hash))
-
-    if not file_hash_ok:
-        if overall_hash is not None:
-            warn(302, "Given hash '%s' " % overall_hash
-                 + "for file does not match actual AND "
-                 + "one or more chunks corrupted")
-        else:
-            warn(301, "One or more chunks corrupted.")
-    return payload, file_hash_ok
-
-
 def infer_mode(args):
     """If encode/decode is unknown, return which it 'should' be,
     based on various heuristics.
@@ -460,41 +264,6 @@ def set_defaults(args):
             exit_with_error(105, args.output, str(err), severity=4)
 
     return args
-
-
-def shashum(data):
-    '''Return sha256 sum of input, encdoded in base16'''
-    return hashlib.sha256(data).hexdigest()
-
-
-def warn(integer, *argv, **kwargs):
-    '''Issue a warning to stderr for every argument given
-    Prepends colon to every successive argument
-    kwargs are ignored except for severity'''
-    if 'severity' not in kwargs.keys():
-        kwargs['severity'] = 2
-    error = "%s %d: %s" % (LEVELS[kwargs['severity']],
-                           integer, ERRORS[integer])
-    for arg in argv:
-        error += ": " + arg
-    stderr.write(error + '\n')
-
-
-def exit_with_error(integer, *argv, **kwargs):
-    '''Issue a warning and exit with return code `integer`.
-    Each successive argument is added to the warning, prepended by a colon.
-    kwargs are ignored, excluding severity'''
-    if 'severity' not in kwargs.keys():
-        kwargs['severity'] = 3
-    warn(integer, *argv, severity=kwargs['severity'])
-    sys.exit(integer)
-
-
-def exit_successfully():
-    '''exit, successfully'''
-    if DEBUG:
-        warn(0, 0)
-    sys.exit(0)
 
 
 def check_for_file(filename):

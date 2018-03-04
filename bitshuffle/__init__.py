@@ -1,4 +1,3 @@
-try:
-    from bitshuffle.errors import LEVELS, ERRORS
-except ImportError:
-    from errors import LEVELS, ERRORS
+'''Module exports to be accessed programmatically'''
+from .library import VERSION, decode, encode_file as encode
+from .main import main
