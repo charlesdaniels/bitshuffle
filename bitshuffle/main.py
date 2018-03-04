@@ -129,8 +129,11 @@ ASCII text suitable for transmission over common communication protocols"""
             args.output.write("\n\n")
 
         args.output.flush()
+        args.input.close()
+        args.output.close()
+        exit_successfully()
 
-    elif args.decode:
+    else:
 
         # set to True for infile to be deleted after decoding
         is_tmp = False
@@ -172,9 +175,6 @@ ASCII text suitable for transmission over common communication protocols"""
             exit_successfully()
         else:
             exit_with_error(302, severity=2)
-
-    args.input.close()
-    args.output.close()
 
 
 # pylint: disable=inconsistent-return-statements
