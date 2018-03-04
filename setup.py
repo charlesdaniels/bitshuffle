@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from bitshuffle.bitshuffle import VERSION
+from bitshuffle import VERSION
 from setuptools import setup
 from setuptools import find_packages
 

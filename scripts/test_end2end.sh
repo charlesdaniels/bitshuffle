@@ -18,7 +18,7 @@
 . "$(dirname "$0")/realpath.sh"
 PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE_FILE="$PROJECT_ROOT/bitshuffle/bitshuffle.py"
+BITSHUFFLE_FILE="$PROJECT_ROOT/wrapper.py"
 
 # shellcheck disable=SC2034
 BITSHUFFLE="python $BITSHUFFLE_FILE"
