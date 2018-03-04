@@ -15,7 +15,7 @@ PROJECT_ROOT="$PARENT_DIR/.."
 
 TEMPFILE="/tmp/$(uuidgen)"
 echo "Checking python codestyle... "
-find "$PROJECT_ROOT" -print | while read -r line ; do
+for line in $PROJECT_ROOT/**.py; do
 	if file "$line" | grep -i 'python script' > /dev/null 2>&1 ; then
 		pycodestyle "$line"
 		RETCODE=$?
