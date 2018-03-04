@@ -14,6 +14,8 @@ BITSHUFFLE="$TEST_DIR/../wrapper.py"
 TESTS_FAILED=0
 
 if [ ! -x "$BITSHUFFLE" ] ; then
+        ls "$TEST_DIR/.."
+        file "$BITSHUFFLE"
         echo "FATAL: '$BITSHUFFLE' does not exist"
         exit 9999
 fi
