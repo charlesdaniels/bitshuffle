@@ -3,5 +3,7 @@ LICENSE
 README.rst
 setup.cfg
 setup.py
-bitshuffle/bitshuffle.py
+bitshuffle/main.py
+bitshuffle/errors.py
+bitshuffle/library.py
 bitshuffle/__init__.py
