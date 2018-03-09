@@ -10,7 +10,7 @@
 # shellcheck disable=SC1090
 . "$(dirname "$0")/realpath.sh"
 TEST_DIR="$(realpath_sh "$(dirname "$0")")"
-BITSHUFFLE="$TEST_DIR/../wrapper.py"
+BITSHUFFLE="$TEST_DIR/../wrapper"
 TESTS_FAILED=0
 
 if [ ! -x "$BITSHUFFLE" ] ; then

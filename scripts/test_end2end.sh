@@ -18,15 +18,10 @@
 . "$(dirname "$0")/realpath.sh"
 PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE_FILE="$PROJECT_ROOT/wrapper.py"
+BITSHUFFLE="$PROJECT_ROOT/wrapper"
 
-# shellcheck disable=SC2034
-BITSHUFFLE="python $BITSHUFFLE_FILE"
-# this variable appears unused to ShellCheck because it is only used inside
-# of eval-ed code.
-
-if [ ! -f "$BITSHUFFLE_FILE" ] ; then
-	echo "FATAL: '$BITSHUFFLE_FILE' does not exist"
+if [ ! -f "$BITSHUFFLE" ] ; then
+	echo "FATAL: '$BITSHUFFLE' does not exist"
 	exit 9999
 fi
 

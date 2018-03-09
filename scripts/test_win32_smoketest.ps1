@@ -6,7 +6,7 @@ Write-Output "Performing win32 smoketest... ";
 $failed_tests = 0;
 
 $project_tld = Split-Path $PSScriptRoot -Parent
-$bitshuffle_bin = Join-Path $project_tld "wrapper.py"
+$bitshuffle_bin = Join-Path $project_tld "wrapper"
 Write-Output "script root is: $PSScriptRoot"
 Write-Output "project TLD is: $project_tld"
 Write-Output "BitShuffle script is: $bitshuffle_bin"
