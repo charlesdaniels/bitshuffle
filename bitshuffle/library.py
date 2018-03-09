@@ -167,8 +167,8 @@ def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
 def decode(message):
     '''Decode any number of packets previously encoded with bitshuffle
     Assumes all packets are part of the same message'''
-    _, _, _, compression, seq_num, \
-        _, packet_hash, chunk, file_hash = range(9)
+    _, _, _, compression_index, seq_index, \
+        _, hash_index, chunk_index, overall_hash_index = range(9)
 
     try:
         packets = re.findall(r'\(\(<<(.*)>>\)\)', message,
@@ -191,30 +191,30 @@ def decode(message):
     for index, packet in enumerate(packets):
         try:
             packet = packet.split("|")
-            if packet[seq_num] != str(index):
+            if packet[seq_index] != str(index):
                 warn(205, "Given number %d does not match actual %d"
-                     % (packet[seq_num], index), "Skipping")
+                     % (packet[seq_index], index), "Skipping")
                 continue
         except IndexError:
             warn(201, "Packet %d is invalid for decoding." % index,
                  "Skipping")
             continue
 
-        if len(packet) - 1 == file_hash:
+        if len(packet) - 1 == overall_hash_index:
             if overall_hash is None:
-                overall_hash = packet[file_hash]
-            elif packet[file_hash] != overall_hash:
+                overall_hash = packet[overall_hash_index]
+            elif packet[overall_hash_index] != overall_hash:
                 warn(302, "Packet" + index)
 
-        hashed = shasum(packet[chunk].encode(encoding='ascii'))
-        if hashed != packet[packet_hash]:
+        hashed = shasum(packet[chunk_index].encode(encoding='ascii'))
+        if hashed != packet[hash_index]:
             num_chunks_wrong += 1
             warn(301, "Given hash for packet %d does not match actual '%s'"
-                 % (index, packet[packet_hash]))
+                 % (index, packet[hash_index]))
 
-        payload += base64.b64decode(packet[chunk])
+        payload += base64.b64decode(packet[chunk_index])
     # pylint: disable=undefined-loop-variable
-    payload = (bz2.decompress(payload) if packet[compression] == "bz2"
+    payload = (bz2.decompress(payload) if packet[compression_index] == "bz2"
                else gzip.decompress(payload))
 
     file_hash_ok = (num_chunks_wrong == 0
