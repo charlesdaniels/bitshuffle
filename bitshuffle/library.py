@@ -158,6 +158,8 @@ def encode(data, chunksize=2048, compresslevel=5, compress=bz2.compress,
     elif isinstance(data, str):
         data = data.decode()
 
+    if not data:
+        return ""
     file_hash = shasum(data)
     chunks = encode_data(data, chunksize, compresslevel, compress)
     seqmax = len(chunks) - 1
