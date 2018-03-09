@@ -16,19 +16,13 @@ from tempfile import mkstemp
 from sys import stdin, stdout, stderr, argv
 
 from bitshuffle import VERSION, decode, encode
-from .library import (gzip, DEFAULT_MSG, DEBUG,
+from .library import (gzip, DEFAULT_MSG, DEBUG, file,
                       exit_successfully, exit_with_error)
 
 try:
     from shutil import which
 except ImportError:  # python2
     from distutils.spawn import find_executable as which
-
-try:
-    assert file
-except NameError:
-    # pylint: disable=invalid-name
-    file = io.IOBase
 
 
 def create_parser():

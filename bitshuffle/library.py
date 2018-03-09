@@ -3,12 +3,13 @@
 from __future__ import division, generators, print_function, absolute_import
 
 import re
+import io
 import bz2
 import gzip
 import string
 import base64
 from hashlib import sha256
-from sys import stderr, stdin, exit as exit_with_code
+from sys import stderr, exit as exit_with_code
 from .errors import LEVELS, ERRORS
 
 VERSION = '0.0.1-git'
@@ -21,12 +22,10 @@ try:  # does nothing if python3
     assert gzip.compress
     assert gzip.decompress
 except AttributeError:  # python2
-    import io
     # taken straight from gzip.py
     # pylint: disable=invalid-name
-
+    # pylint: disable=missing-docstring
     def gzip_compress(data, compresslevel=5):
-        # pylint: disable=missing-docstring
         buf = io.BytesIO()
         c = compresslevel
         with gzip.GzipFile(fileobj=buf, mode='wb', compresslevel=c) as f:
@@ -34,13 +33,18 @@ except AttributeError:  # python2
         return buf.getvalue()
 
     def gzip_decompress(data):
-        # pylint: disable=missing-docstring
         with gzip.GzipFile(fileobj=io.BytesIO(data)) as f:
             return f.read()
 
     gzip.compress = gzip_compress
     gzip.decompress = gzip_decompress
     del gzip_compress, gzip_decompress
+
+try:
+    assert file
+except NameError:
+    # pylint: disable=invalid-name
+    file = io.IOBase
 
 
 def warn(integer, *argv, **kwargs):
@@ -131,21 +135,29 @@ def encode_packet(data, seqnum, seqmax, compress=bz2.compress, msg=DEFAULT_MSG,
     return packet
 
 
-def encode_file(fhandle=stdin, chunksize=2048, compresslevel=5,
-                compress=bz2.compress, msg=DEFAULT_MSG):
-    """encode_file
+def encode(data, chunksize=2048, compresslevel=5, compress=bz2.compress,
+           msg=DEFAULT_MSG):
+    """encode
 
-    Encode the file from fhandle and return a list of strings containing
+    Encode arbitrary data and return a list of strings containing
     BitShuffle data packets.
 
-    :param fhandle:
+    If `data` is a filehandle, assumes the file is open for reading.
+    Does not close file when finished.
+
+    :param data: filehandle, bytes, or str
     """
 
-    try:
-        # Python 3
-        data = fhandle.buffer.read()
-    except AttributeError:
-        data = fhandle.read()
+    if isinstance(data, file):
+        try:
+            # Python 3
+            data = data.buffer.read()
+        except AttributeError:
+            data = data.read()
+
+    elif isinstance(data, str):
+        data = data.decode()
+
     file_hash = shasum(data)
     chunks = encode_data(data, chunksize, compresslevel, compress)
     seqmax = len(chunks) - 1
