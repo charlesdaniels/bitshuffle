@@ -18,7 +18,7 @@
 . "$(dirname "$0")/realpath.sh"
 PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
 PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE="$PROJECT_ROOT/wrapper"
+BITSHUFFLE="$PROJECT_ROOT/wrapper.py"
 
 if [ ! -f "$BITSHUFFLE" ] ; then
 	echo "FATAL: '$BITSHUFFLE' does not exist"

@@ -1,2 +1,0 @@
-#!/bin/sh
-cd "$(dirname "$(realpath "$0")")" && exec python -m bitshuffle "$@"
