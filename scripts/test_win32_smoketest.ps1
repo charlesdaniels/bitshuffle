@@ -27,9 +27,9 @@ Get-Process | Out-File "rand_test_file.bin"
 $rand_file_hash = (Get-FileHash -Algorithm SHA1 -Path "rand_test_file.bin").Hash
 
 Write-Output "Testing non-pipelined encode/decode..."
-& "$python_bin" $bitshuffle_bin --encode --input "rand_test_file.bin" --output "test_1.txt" | ForEach-Object {Write-Output "`toutput: $_";}
+& $bitshuffle_bin --encode --input "rand_test_file.bin" --output "test_1.txt" | ForEach-Object {Write-Output "`toutput: $_";}
 $ret1 = $?;
-& "$python_bin" $bitshuffle_bin --decode --input "test_1.txt" --output "test_1.bin" | ForEach-Object {Write-Output "`toutput: $_";}
+& $bitshuffle_bin --decode --input "test_1.txt" --output "test_1.bin" | ForEach-Object {Write-Output "`toutput: $_";}
 $ret2 = $?;
 $test_hash_1 = (Get-FileHash -Algorithm SHA1 -Path "test_1.bin").Hash
 $compare_result = ($rand_file_hash -eq $test_hash_1)
@@ -44,7 +44,7 @@ if ($ret1 -and $ret2 -and $compare_result) {
 
 
 Write-Output "Testing pipelined encode/decode..."
-& "$python_bin" $bitshuffle_bin --encode --input "rand_test_file.bin" | & "$python_bin" $bitshuffle_bin --decode --output "test_2.bin" | ForEach-Object {Write-Output "`toutput: $_";} *>&1
+& $bitshuffle_bin --encode --input "rand_test_file.bin" | & $bitshuffle_bin --decode --output "test_2.bin" | ForEach-Object {Write-Output "`toutput: $_";} *>&1
 $ret1 = $?;
 $test_hash_2 = (Get-FileHash -Algorithm SHA1 -Path "test_2.bin").Hash
 $compare_result = ($rand_file_hash -eq $test_hash_2)
