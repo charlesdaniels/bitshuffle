@@ -78,6 +78,7 @@ def main():
     """A tool for encoding and decoding arbitrary binary data as
 ASCII text suitable for transmission over common communication protocols"""
 
+    global stdin
     parser = create_parser()
     args = parser.parse_args()
 
@@ -110,7 +111,7 @@ ASCII text suitable for transmission over common communication protocols"""
         else:
             compress = gzip.compress
 
-        packets = encode(stdin, args.size, args.compresslevel,
+        packets = encode(stdin, args.chunksize, args.compresslevel,
                          compress, args.message)
         for packet in packets:
             stdout.write(packet)
@@ -140,9 +141,9 @@ ASCII text suitable for transmission over common communication protocols"""
                                "You do not need to delete this message.\n\n")
                 tempfile.flush()
             subprocess.call([args.editor, tmpfile])
-            args.input = open(tmpfile, 'r')
+            stdin = open(tmpfile, 'r')
 
-        payload, checksum_ok = decode(args.input.read())
+        payload, checksum_ok = decode(stdin.read())
         try:
             # python 3
             stdout.buffer.write(payload)
