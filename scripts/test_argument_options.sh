@@ -74,19 +74,6 @@ expect_usage_error -t gmander
 #        rm -f $LOG_FILE
 #fi
 
-LOG_FILE="/tmp/$(uuidgen)"
-printf "When given bad input, prints file not found... "
-$BITSHUFFLE --input /nonexistent/nope > "$LOG_FILE" 2>&1
-if grep -i 'could not open' < "$LOG_FILE" > /dev/null 2>&1 ; then
-    echo "PASSED"
-else
-    printf "FAILED\n\n"
-
-    print_log_file "$LOG_FILE"
-    TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
-    rm -f "$LOG_FILE"
-fi
-
 echo "$TESTS_FAILED tests failed."
 echo
 exit "$TESTS_FAILED"
