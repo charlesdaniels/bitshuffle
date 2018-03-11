@@ -35,15 +35,6 @@ def create_parser():
     '''Argument options for CLI tool'''
     parser = argparse.ArgumentParser(description=main.__doc__)
 
-    parser.add_argument("--input", "-i",
-                        help="Input file. Defaults to stdin. If the only " +
-                        "argument, implies --encode")
-
-    parser.add_argument("--output", "-o",
-                        help="Output file. Defaults to stdout. If the only " +
-                        "argument, and stdin is not a tty, implies " +
-                        "--decode")
-
     parser.add_argument("--encode", "-e", action="store_true",
                         help="Generate a BitShuffle data packet from" +
                         "the input file and write it to the output.")
@@ -109,9 +100,6 @@ ASCII text suitable for transmission over common communication protocols"""
     # args.output are open file handles (or crashes the script if not).
     args = set_defaults(args)
 
-    assert isinstance(args.input, file)
-    assert isinstance(args.output, file)
-
     # Main
     if args.encode:
         if args.compresstype not in ['bz2', 'gzip']:
@@ -122,22 +110,19 @@ ASCII text suitable for transmission over common communication protocols"""
         else:
             compress = gzip.compress
 
-        packets = encode(args.input, args.chunksize, args.compresslevel,
+        packets = encode(stdin, args.size, args.compresslevel,
                          compress, args.message)
         for packet in packets:
-            args.output.write(packet)
-            args.output.write("\n\n")
+            stdout.write(packet)
+            stdout.write("\n\n")
 
-        args.output.flush()
-        args.input.close()
-        args.output.close()
         exit_successfully()
 
     else:
 
         # set to True for infile to be deleted after decoding
         is_tmp = False
-        if stdin.isatty() and args.input is stdin:
+        if stdin.isatty():
             # ask the user to paste the packets into $VISUAL
             is_tmp = True
             if not args.editor:
@@ -160,16 +145,13 @@ ASCII text suitable for transmission over common communication protocols"""
         payload, checksum_ok = decode(args.input.read())
         try:
             # python 3
-            args.output.buffer.write(payload)
+            stdout.buffer.write(payload)
         except AttributeError:
             # python 2
-            args.output.write(payload)
+            stdout.write(payload)
 
         if is_tmp and tmpfile:
             os.remove(tmpfile)
-
-        args.input.close()
-        args.output.close()
 
         if checksum_ok:
             exit_successfully()
@@ -222,14 +204,7 @@ def infer_mode(args):
     elif args.editor:
         args.decode = True
 
-    elif args.input:
-        # pylint: disable=simplifiable-if-statement
-        if args.output:
-            args.decode = True
-        else:
-            args.encode = True
-
-    elif not args.output and not stdin.isatty():
+    elif not stdin.isatty():
         args.encode = True
 
     else:
@@ -242,26 +217,12 @@ def set_defaults(args):
     '''Set default arguments for BitShuffle
     TODO: make this part of argparse'''
 
-    defaults = {'input': stdin, 'output': stdout,
-                'editor': find_editor(), 'chunksize': 2048,
+    defaults = {'editor': find_editor(), 'chunksize': 2048,
                 'compresslevel': 5, 'compresstype': 'bz2'}
 
     for arg in args.__dict__:
         if arg in defaults and not args.__dict__[arg]:
             args.__dict__[arg] = defaults[arg]
-
-    # open args.input and args.output so they are file handles
-    if not isinstance(args.input, file):
-        try:
-            args.input = open(args.input, 'rb')
-        except IOError as err:
-            exit_with_error(104, args.input, str(err), severity=4)
-
-    if not isinstance(args.output, file):
-        try:
-            args.output = open(args.output, 'wb')
-        except IOError as err:
-            exit_with_error(105, args.output, str(err), severity=4)
 
     return args
 
