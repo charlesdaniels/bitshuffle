@@ -57,35 +57,35 @@ do_test () {
 all_tests () {
 
     printf "Basic encode/decode test... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
     printf "Basic encode/decode test (non-default message)... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --message foo | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" --message foo | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
     printf "Basic encode/decode test (large chunk size)... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" --chunksize 16384 | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
 
     printf "Basic encode/decode test (small chunk size)... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 8 | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" --chunksize 8 | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
 
     printf "Double encode/decode test... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
+    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" | \
         $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
     printf "GZIP test... "
-    do_test '$BITSHUFFLE --encode --compresstype "gzip" --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode --compresstype "gzip" < "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
     printf "BZIP test... "
-    do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    do_test '$BITSHUFFLE --encode --compresstype "bz2" < "$TEMPFILE_SRC" | \
+        $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
     printf "Unicode test... "
     TEMPFILE_SRC="$(uuidgen)"
@@ -93,8 +93,8 @@ all_tests () {
     LOG_FILE="$(uuidgen)"
     echo '←↑→↓↔↕↖↗↘↜↛↠↢↮↹⇆⇏⇚⇼⇿∀∁∂∃∄∅∆∈∉∋∎∐∓∗√∦∯∿' > "$TEMPFILE_SRC"
     TEMPFILE_SRC_SHA="$(shasum "$TEMPFILE_SRC" 2>&1 | cut -d ' ' -f 1)"
-    $BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
-    $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1
+    ($BITSHUFFLE --encode < "$TEMPFILE_SRC" | \
+    $BITSHUFFLE --decode > "$TEMPFILE_DST") > "$LOG_FILE" 2>&1
 	TEMPFILE_DST_SHA="$(shasum "$TEMPFILE_DST" 2>&1 | cut -d ' ' -f 1)"
 	if [ "$TEMPFILE_DST_SHA" = "$TEMPFILE_SRC_SHA" ] ; then
 		echo "PASSED"
