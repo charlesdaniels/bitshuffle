@@ -17,11 +17,10 @@
 # shellcheck disable=SC1090
 . "$(dirname "$0")/realpath.sh"
 PARENT_DIR="$(realpath_sh "$(dirname "$0")")"
-PROJECT_ROOT="$PARENT_DIR/.."
-BITSHUFFLE="$PROJECT_ROOT/wrapper.py"
+BITSHUFFLE="$PARENT_DIR/../wrapper.py"
 
-if [ ! -f "$BITSHUFFLE" ] ; then
-	echo "FATAL: '$BITSHUFFLE' does not exist"
+if [ ! -x "$BITSHUFFLE" ] ; then
+	echo "FATAL: '$BITSHUFFLE' does not exist or is not executable"
 	exit 9999
 fi
 
@@ -52,43 +51,41 @@ do_test () {
 		printf "\n\n"
 		TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
 	fi
-	rm -f "$LOG_FILE"
-	rm -f "$TEMPFILE_SRC"
-	rm -f "$TEMPFILE_DST"
+	rm -f "$LOG_FILE" "$TEMPFILE_SRC" "$TEMPFILE_DST"
 }
 
 all_tests () {
 
     printf "Basic encode/decode test... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "Basic encode/decode test (non-default message)... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --message foo | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "Basic encode/decode test (large chunk size)... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 16384 | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
 
     printf "Basic encode/decode test (small chunk size)... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" --chunksize 8 | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
 
     printf "Double encode/decode test... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
         $BITSHUFFLE --encode | $BITSHUFFLE --decode | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "GZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "gzip" --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "BZIP test... "
     do_test '$BITSHUFFLE --encode --compresstype "bz2" --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "Unicode test... "
     TEMPFILE_SRC="$(uuidgen)"
@@ -112,13 +109,11 @@ all_tests () {
 		printf "\n\n"
 		TESTS_FAILED="$(echo "$TESTS_FAILED + 1" | bc)"
     fi
-	rm -f "$LOG_FILE"
-	rm -f "$TEMPFILE_SRC"
-	rm -f "$TEMPFILE_DST"
+	rm -f "$LOG_FILE" "$TEMPFILE_SRC" "$TEMPFILE_DST"
 
     printf "Test infer encode from --input... "
     do_test '$BITSHUFFLE --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST" > "$LOG_FILE" 2>&1'
+        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
 
     printf "Test infer decode from --output and non-tty stdin... "
     do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
