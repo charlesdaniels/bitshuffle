@@ -83,7 +83,7 @@ ASCII text suitable for transmission over common communication protocols"""
     args = parser.parse_args()
 
     # Checks if no parameters were passed
-    if not argv[1:]:
+    if not argv[1:] and stdin.isatty():
         parser.print_help()
         if DEBUG:
             exit_with_error(1, 0)
@@ -191,17 +191,9 @@ def infer_mode(args):
     if args.encode or args.decode:
         return args
 
+    # TODO: check if stdin looks like a packet (#55)
     elif any((args.compresstype, args.compresslevel,
-              args.chunksize)):
-        args.encode = True
-
-    # this is a submenu: could specify editor to compose
-    # TODO: check editor when encoding as well as decoding
-
-    elif args.editor:
-        args.decode = True
-
-    elif not stdin.isatty():
+              args.chunksize, stdin.isatty(), not argv[1:])):
         args.encode = True
 
     else:

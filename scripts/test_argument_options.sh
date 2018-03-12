@@ -49,8 +49,6 @@ expect_usage_error () {
 }
 
 echo "Running argument tests..."
-printf "When run with no args, prints help... "
-expect_usage_error
 
 printf "When run with '-h', prints help... "
 expect_usage_error -h
@@ -59,6 +57,9 @@ printf "When given bad compresstype, prints help... "
 expect_usage_error -t gmander
 
 # Can't be tested non-interactively
+#printf "When run with no args, prints help... "
+#expect_usage_error
+#
 #printf "When given bad editor, prints editor not found... "
 #LOG_FILE="/tmp/`uuidgen`"
 #$BITSHUFFLE --decode --editor /nonexistent > "$LOG_FILE" 2>&1

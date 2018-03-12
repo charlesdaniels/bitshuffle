@@ -111,13 +111,14 @@ all_tests () {
     fi
 	rm -f "$LOG_FILE" "$TEMPFILE_SRC" "$TEMPFILE_DST"
 
-    printf "Test infer encode from --input... "
-    do_test '$BITSHUFFLE --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --decode --output "$TEMPFILE_DST"'
+    printf "Test infer encode from no arguments and non-interactive tty... "
+    do_test '$BITSHUFFLE < "$TEMPFILE_SRC" | \
+         $BITSHUFFLE --decode > "$TEMPFILE_DST"'
 
-    printf "Test infer decode from --output and non-tty stdin... "
-    do_test '$BITSHUFFLE --encode --input "$TEMPFILE_SRC" | \
-        $BITSHUFFLE --output "$TEMPFILE_DST"'
+    # TODO: infer encode/decode from what input looks like
+#    printf "Test infer decode from non-tty stdin... "
+#    do_test '$BITSHUFFLE --encode < "$TEMPFILE_SRC" | \
+#        $BITSHUFFLE > "$TEMPFILE_DST"'
 
 }
 
