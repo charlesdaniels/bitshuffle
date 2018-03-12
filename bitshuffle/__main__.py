@@ -45,8 +45,7 @@ def create_parser():
                         "the input file, and write the decoded file to the " +
                         "output file.")
 
-    parser.add_argument("--version", "-v", action="store_true",
-                        help="Displays the current version of bitshuffle.")
+    parser.add_argument("--version", "-v", action="version", version=VERSION)
 
     parser.add_argument("--chunksize", "-c", type=int,
                         help="Chunk size in bytes. Defaults to 2048.")
@@ -90,10 +89,6 @@ ASCII text suitable for transmission over common communication protocols"""
             exit_with_error(1, 0)
         else:
             exit_successfully()
-
-    elif args.version:
-        print("Version: bitshuffle v{0}".format(VERSION))
-        exit_successfully()
 
     # Encode & Decode inference
     args = infer_mode(args)
