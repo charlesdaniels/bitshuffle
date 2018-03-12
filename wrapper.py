@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import os
+import subprocess
 import sys
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
-os.execvp("python", ["python", "-m", "bitshuffle"] + sys.argv[1:])
+import os
+subprocess.call(["python", "-m", "bitshuffle"] + sys.argv[1:],
+                stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
+                cwd=os.path.dirname(os.path.realpath(__file__)))
