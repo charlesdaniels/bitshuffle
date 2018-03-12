@@ -35,12 +35,13 @@ def create_parser():
     '''Argument options for CLI tool'''
     parser = argparse.ArgumentParser(description=main.__doc__)
 
-    parser.add_argument("--encode", "-e", action="store_true",
+    action = parser.add_mutually_exclusive_group()
+    action.add_argument("--encode", "-e", action="store_true",
                         help="Generate a BitShuffle data packet from" +
                         "the input file and write it to the output.")
 
-    parser.add_argument("--decode", "-d", "-D", action="store_true",
-                        help="Extract BitShuffle data packet(s) from the " +
+    action.add_argument("--decode", "-d", "-D", action="store_true",
+                        help="Extract BitShuffle data packet(s) from " +
                         "the input file, and write the decoded file to the " +
                         "output file.")
 
