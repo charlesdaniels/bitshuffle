@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-'''
-BitShuffle command-line client. Supports encoding & decoding.
-Run with --help for usage information.
-'''
+"""A tool for encoding and decoding arbitrary binary data as
+ASCII text suitable for transmission over common communication protocols"""
 
 from __future__ import division, generators, print_function, absolute_import
 
@@ -33,7 +31,7 @@ except NameError:
 
 def create_parser():
     '''Argument options for CLI tool'''
-    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
 
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--encode", "-e", action="store_true",
@@ -71,89 +69,6 @@ def create_parser():
                         help="Override message displayed in every packet." +
                         " (default: " + DEFAULT_MSG + ")")
     return parser
-
-
-def main():
-
-    """A tool for encoding and decoding arbitrary binary data as
-ASCII text suitable for transmission over common communication protocols"""
-
-    global stdin
-    parser = create_parser()
-    args = parser.parse_args()
-
-    # Checks if no parameters were passed
-    if not argv[1:] and stdin.isatty():
-        parser.print_help()
-        if DEBUG:
-            exit_with_error(1, 0)
-        else:
-            exit_successfully()
-
-    # Encode & Decode inference
-    args = infer_mode(args)
-
-    # Set default values. Note that this ensures that args.input and
-    # args.output are open file handles (or crashes the script if not).
-    args = set_defaults(args)
-
-    # Main
-    if args.encode:
-        if args.compresstype not in ['bz2', 'gzip']:
-            parser.print_help()
-            exit_with_error(2, args.compresstype)
-        elif args.compresstype == 'bz2':
-            compress = bz2.compress
-        else:
-            compress = gzip.compress
-
-        packets = encode(stdin, args.chunksize, args.compresslevel,
-                         compress, args.message)
-        for packet in packets:
-            stdout.write(packet)
-            stdout.write("\n\n")
-
-        exit_successfully()
-
-    else:
-
-        # set to True for infile to be deleted after decoding
-        is_tmp = False
-        if stdin.isatty():
-            # ask the user to paste the packets into $VISUAL
-            is_tmp = True
-            if not args.editor:
-                args.editor = find_editor()
-
-            if not check_for_file(args.editor):
-                exit_with_error(103, args.editor)
-
-            if DEBUG:
-                stderr.write("editor is %s\n" % args.editor)
-
-            tmpfile = mkstemp()[1]
-            with open(tmpfile, 'w') as tempfile:
-                tempfile.write("Paste your BitShuffle packets in this file. " +
-                               "You do not need to delete this message.\n\n")
-                tempfile.flush()
-            subprocess.call([args.editor, tmpfile])
-            stdin = open(tmpfile, 'r')
-
-        payload, checksum_ok = decode(stdin.read())
-        try:
-            # python 3
-            stdout.buffer.write(payload)
-        except AttributeError:
-            # python 2
-            stdout.write(payload)
-
-        if is_tmp and tmpfile:
-            os.remove(tmpfile)
-
-        if checksum_ok:
-            exit_successfully()
-        else:
-            exit_with_error(302, severity=2)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -227,5 +142,73 @@ def check_for_file(filename):
         return False
 
 
-if __name__ == "__main__":
-    main()
+PARSER = create_parser()
+ARGS = PARSER.parse_args()
+
+# Checks if no parameters were passed
+if stdin.isatty() and not argv[1:]:
+    PARSER.print_help()
+    if DEBUG:
+        exit_with_error(1, 0)
+    else:
+        exit_successfully()
+
+# Encode & Decode inference
+ARGS = infer_mode(ARGS)
+ARGS = set_defaults(ARGS)
+
+# Main
+if ARGS.encode:
+    if ARGS.compresstype not in ['bz2', 'gzip']:
+        PARSER.print_help()
+        exit_with_error(2, ARGS.compresstype)
+    elif ARGS.compresstype == 'bz2':
+        COMPRESS = bz2.compress
+    else:
+        COMPRESS = gzip.compress
+
+    for packet in encode(stdin, ARGS.chunksize, ARGS.compresslevel,
+                         COMPRESS, ARGS.message):
+        stdout.write(packet)
+        stdout.write("\n\n")
+
+    exit_successfully()
+
+# else
+# set to True for infile to be deleted after decoding
+IS_TMP = False
+if stdin.isatty():
+    # ask the user to paste the packets into $VISUAL
+    IS_TMP = True
+    if not ARGS.editor:
+        ARGS.editor = find_editor()
+
+    if not check_for_file(ARGS.editor):
+        exit_with_error(103, ARGS.editor)
+
+    if DEBUG:
+        stderr.write("editor is %s\n" % ARGS.editor)
+
+    TMPFILE = mkstemp()[1]
+    with open(TMPFILE, 'w') as tempfile:
+        tempfile.write("Paste your BitShuffle packets in this file. " +
+                       "You do not need to delete this message.\n\n")
+        tempfile.flush()
+    subprocess.call([ARGS.editor, TMPFILE])
+    stdin = open(TMPFILE, 'r')
+
+PAYLOAD, CHECKSUM_OK = decode(stdin.read())
+try:
+    # python 3
+    stdout.buffer.write(PAYLOAD)
+except AttributeError:
+    # python 2
+    stdout.write(PAYLOAD)
+
+if IS_TMP and TMPFILE:
+    os.remove(TMPFILE)
+
+if not CHECKSUM_OK:
+    exit_with_error(302, severity=2)
+
+exit_successfully()
