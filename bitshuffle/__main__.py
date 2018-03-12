@@ -53,7 +53,7 @@ def create_parser():
     parser.add_argument("--compresslevel", '-l', type=int,
                         help="Compression level when encoding. " +
                         "1 is lowest, 9 is highest. Defaults to 5. " +
-                        "Ignore if specified compresstype does not support" +
+                        "Ignored if specified compresstype does not support" +
                         " multiple compression levels.")
 
     parser.add_argument("--editor", "-E",
